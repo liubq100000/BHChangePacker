@@ -21,8 +21,6 @@ public class PackerV1Main {
 
 	public static void main(String[] args) {
 		try {
-			// 导出文件保存目录
-			String exportSavePath = "C:\\Users\\Administrator\\Desktop\\test";
 			// 工程所用的tomcat地址（主要是为了Copy class等文件）
 			String projectTomcat = "D:\\tomcat\\webapps\\con_assets1";
 			// 工程地址
@@ -36,7 +34,7 @@ public class PackerV1Main {
 				SysLog.log(line);
 			}
 			// 打包
-			DiffFilePacker p = new DiffFilePacker(projectTomcat, exportSavePath);
+			DiffFilePacker p = new DiffFilePacker(projectTomcat);
 			p.pack(list);
 
 		} catch (Exception e) {

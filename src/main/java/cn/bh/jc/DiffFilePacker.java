@@ -28,11 +28,11 @@ public class DiffFilePacker {
 	 * 变更文件打包工具
 	 * 
 	 * @param inProjectTomcat tomcat下工程路径 例如：D:\tomcat7575\webapps\equipmentsys
-	 * @param path 打包文件保存路径 例如：C:\\Users\\Administrator\\Desktop\\test
+	 * @param inPath 打包文件保存路径 例如：C:\\Users\\Administrator\\Desktop\\test
 	 */
-	public DiffFilePacker(String inProjectTomcat, String inPath) {
+	public DiffFilePacker(String inProjectTomcat) {
 		this.projectTomcat = PathUtil.replace(inProjectTomcat);
-		this.exportSavePath = PathUtil.replace(inPath) + "/" + "upgrade_" + System.currentTimeMillis();
+		this.exportSavePath = PathUtil.SAVE_PATH + "/upgrade_" + System.currentTimeMillis();
 		File file = new File(exportSavePath);
 		file.mkdirs();
 	}

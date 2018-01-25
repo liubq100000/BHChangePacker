@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.tmatesoft.svn.core.SVNLogEntry;
 import org.tmatesoft.svn.core.SVNLogEntryPath;
+import org.tmatesoft.svn.core.SVNNodeKind;
 import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
 import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory;
@@ -89,15 +90,17 @@ public class SVNWorker {
 				String key;
 				for (Map.Entry<String, SVNLogEntryPath> entry : log.getChangedPaths().entrySet()) {
 					key = entry.getKey();
-					// 排除文件跳过
-					if (isExclusive(key)) {
-						continue;
-					}
-					if ("D".equalsIgnoreCase(String.valueOf(entry.getValue().getType()))) {
-						fileList.remove(key);
-					} else {
-						if (!fileList.contains(key)) {
-							fileList.add(key);
+					if (!entry.getValue().getKind().equals(SVNNodeKind.DIR)) {
+						// 排除文件跳过
+						if (isExclusive(key)) {
+							continue;
+						}
+						if ("D".equalsIgnoreCase(String.valueOf(entry.getValue().getType()))) {
+							fileList.remove(key);
+						} else {
+							if (!fileList.contains(key)) {
+								fileList.add(key);
+							}
 						}
 					}
 				}
@@ -122,17 +125,8 @@ public class SVNWorker {
 		if (file == null) {
 			return true;
 		}
-		// 判断是否是目录
-		if (file.lastIndexOf(".") < 0) {
-			return true;
-		}
-		// 标准目录
+		// 标准文件路径
 		String name = PathUtil.replace(file);
-		// 判断是否是目录
-		String fileName = name.substring(file.lastIndexOf("/"));
-		if (fileName.lastIndexOf(".") < 0) {
-			return true;
-		}
 		// 特殊文件排除
 		if (name.indexOf(projectName + "/.") > 5) {
 			return true;

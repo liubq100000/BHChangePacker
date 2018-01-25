@@ -13,8 +13,6 @@ public class PackEquipmentsV2 {
 
 	public static void main(String[] args) {
 		try {
-			// 导出文件保存目录
-			String exportSavePath = "C:\\Users\\Administrator\\Desktop";
 			// 工程所用的tomcat地址（主要是为了Copy class等文件）
 			String projectTomcat = "D:\\tomcat7575\\webapps\\equipmentsys";
 			List<SVNVersion> chageList = new ArrayList<SVNVersion>();
@@ -32,7 +30,7 @@ public class PackEquipmentsV2 {
 			}
 			SysLog.log("******************************************************");
 			// 打包
-			DiffFilePacker p = new DiffFilePacker(projectTomcat, exportSavePath);
+			DiffFilePacker p = new DiffFilePacker(projectTomcat);
 			p.pack(list);
 		} catch (Exception e) {
 			SysLog.log("异常", e);
