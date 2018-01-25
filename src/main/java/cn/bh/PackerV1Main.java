@@ -5,6 +5,7 @@ import java.util.List;
 
 import cn.bh.jc.DiffFilePacker;
 import cn.bh.jc.IListDiffOper;
+import cn.bh.jc.common.SysLog;
 import cn.bh.jc.diff.ListDiffByLastModified;
 import cn.bh.jc.vo.TimeVersion;
 
@@ -27,19 +28,19 @@ public class PackerV1Main {
 			// 工程地址
 			List<TimeVersion> changeList = new ArrayList<TimeVersion>();
 			changeList.add(new TimeVersion("X:\\workspace\\con_assets", "2017-12-20 23:59:59"));
-			System.out.println(" 开始支持请等待   ");
+			SysLog.log(" 开始支持请等待   ");
 			// 根据版本取得差异文件
 			IListDiffOper oper = new ListDiffByLastModified(changeList);
 			List<String> list = oper.listChangeFile();
 			for (String line : list) {
-				System.out.println(line);
+				SysLog.log(line);
 			}
 			// 打包
 			DiffFilePacker p = new DiffFilePacker(projectTomcat, exportSavePath);
 			p.pack(list);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			SysLog.log("异常", e);
 		}
 	}
 

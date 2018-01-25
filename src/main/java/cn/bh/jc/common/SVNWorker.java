@@ -66,7 +66,7 @@ public class SVNWorker {
 			// 根据URL实例化SVN版本库。
 			repository = SVNRepositoryFactory.create(repositoryURL);
 		} catch (Exception e) {
-			System.err.println("创建版本库实例时失败，版本库的URL是 '" + url + "': " + e.getMessage());
+			SysLog.log("创建版本库实例时失败，版本库的URL是 '" + url + "'", e);
 			throw e;
 		}
 		// 对版本库设置认证信息。
@@ -93,8 +93,6 @@ public class SVNWorker {
 					if (isExclusive(key)) {
 						continue;
 					}
-					// System.out.println(entry.getValue().getType() + " " +
-					// key);
 					if ("D".equalsIgnoreCase(String.valueOf(entry.getValue().getType()))) {
 						fileList.remove(key);
 					} else {
@@ -106,13 +104,15 @@ public class SVNWorker {
 			}
 			return fileList;
 		} catch (Exception e) {
-			System.err.println("下载这个期间内所有变更文件错误: " + e.getMessage());
+			SysLog.log("下载这个期间内所有变更文件错误: ", e);
 			throw e;
 		}
 	}
 
 	/**
 	 * 是否需要排除
+	 * 
+	 * 这样仍然排除不了所有目录 例如：abc/ddd/asd.d这个类型目录
 	 * 
 	 * @param file
 	 * @return
@@ -122,11 +122,18 @@ public class SVNWorker {
 		if (file == null) {
 			return true;
 		}
+		// 判断是否是目录
 		if (file.lastIndexOf(".") < 0) {
 			return true;
 		}
-		// 特殊文件排除
+		// 标准目录
 		String name = PathUtil.replace(file);
+		// 判断是否是目录
+		String fileName = name.substring(file.lastIndexOf("/"));
+		if (fileName.lastIndexOf(".") < 0) {
+			return true;
+		}
+		// 特殊文件排除
 		if (name.indexOf(projectName + "/.") > 5) {
 			return true;
 		}

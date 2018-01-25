@@ -1,4 +1,4 @@
-package cn.bh;
+package cn.history;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,15 +9,7 @@ import cn.bh.jc.common.SysLog;
 import cn.bh.jc.diff.ListDiffBySVN;
 import cn.bh.jc.vo.SVNVersion;
 
-/**
- * SVN方式打包
- * 注意，必须保持本地最新代码，因为要取本地tomcat下编译好的class,js等文件，本项目不能自动编译
- * resource 会自动跳过，配置文件自己拷贝
- * 
- * @author liubq
- * @since 2017年12月21日
- */
-public class PackerV2Main {
+public class PackConAssetsV2 {
 
 	public static void main(String[] args) {
 		try {

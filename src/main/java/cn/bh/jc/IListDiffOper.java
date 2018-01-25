@@ -9,5 +9,12 @@ import java.util.List;
  * @since 2018年1月4日
  */
 public interface IListDiffOper {
+
+	/**
+	 * 列出所有变化文件
+	 * 
+	 * @return 变化文件列表
+	 * @throws Exception
+	 */
 	public List<String> listChangeFile() throws Exception;
 }

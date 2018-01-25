@@ -36,13 +36,13 @@ public class FileCopy {
 	public static void copyFile(File oldFile, File newFile) throws Exception {
 		InputStream inStream = null;
 		FileOutputStream fs = null;
-		if (!oldFile.exists()) {
+		if (!oldFile.exists() || oldFile.isDirectory()) {
 			return;
 		}
 		try {
 			if (newFile.exists()) {
 				if (!newFile.delete()) {
-					System.out.println(newFile.getAbsolutePath() + " 删除失败");
+					SysLog.log(newFile.getAbsolutePath() + " 删除失败");
 				}
 			}
 			@SuppressWarnings("unused")
@@ -59,7 +59,7 @@ public class FileCopy {
 			}
 			fs.flush();
 			fs.close();
-			System.out.println("复制文件： " + newFile.getAbsolutePath());
+			SysLog.log("复制文件： " + newFile.getAbsolutePath());
 		} finally {
 			if (inStream != null) {
 				inStream.close();

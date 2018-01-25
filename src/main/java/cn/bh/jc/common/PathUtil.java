@@ -18,8 +18,9 @@ public class PathUtil {
 	private static List<String> exclusiveList = new ArrayList<String>();
 	// 初始化排除文件列表
 	static {
-		exclusiveList.add("src/main/resources");
+		// exclusiveList.add("src/main/resources");
 		exclusiveList.add("target");
+		exclusiveList.add("classes");
 	}
 
 	// 目录对应文件
@@ -27,12 +28,15 @@ public class PathUtil {
 	// 初始化目录对应关系
 	static {
 		resPathList.add(new VSVO("/src/main/java/", "/WEB-INF/classes/"));
+		resPathList.add(new VSVO("/src/main/resources/", "/WEB-INF/classes/"));
 		resPathList.add(new VSVO("/src/main/webapp/", "/"));
 		resPathList.add(new VSVO("/src/java/", "/WEB-INF/classes/"));
 		resPathList.add(new VSVO("/src/webapp/", "/"));
 		resPathList.add(new VSVO("/src/", "/WEB-INF/classes/"));
 		resPathList.add(new VSVO("/WebRoot/", "/"));
 		resPathList.add(new VSVO("/WebContent/", "/"));
+		// resPathList.add(new VSVO("/overlays/com.jc.jcap.jcap-static-1.2/",
+		// "/"));
 	}
 
 	/**

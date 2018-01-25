@@ -1,4 +1,4 @@
-package cn.bh;
+package cn.history;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,27 +9,19 @@ import cn.bh.jc.common.SysLog;
 import cn.bh.jc.diff.ListDiffBySVN;
 import cn.bh.jc.vo.SVNVersion;
 
-/**
- * SVN方式打包
- * 注意，必须保持本地最新代码，因为要取本地tomcat下编译好的class,js等文件，本项目不能自动编译
- * resource 会自动跳过，配置文件自己拷贝
- * 
- * @author liubq
- * @since 2017年12月21日
- */
-public class PackerV2Main {
+public class PackEquipmentsV2 {
 
 	public static void main(String[] args) {
 		try {
 			// 导出文件保存目录
-			String exportSavePath = "C:\\Users\\Administrator\\Desktop\\test";
+			String exportSavePath = "C:\\Users\\Administrator\\Desktop";
 			// 工程所用的tomcat地址（主要是为了Copy class等文件）
-			String projectTomcat = "D:\\tomcat\\webapps\\con_assets";
+			String projectTomcat = "D:\\tomcat7575\\webapps\\equipmentsys";
 			List<SVNVersion> chageList = new ArrayList<SVNVersion>();
-			String url = "svn://172.16.0.155:9999/jcsvn/%E5%90%89%E6%9E%97%E7%9C%81%E9%A3%9F%E5%93%81%E8%8D%AF%E5%93%81%E7%9B%91%E7%9D%A3%E7%AE%A1%E7%90%86%E5%B1%80%E9%A1%B9%E7%9B%AE/%E8%8D%AF%E6%A3%80%E6%89%80%E9%A1%B9%E7%9B%AE/%E5%BC%80%E5%8F%91%E7%9B%B8%E5%85%B3/%E8%B5%84%E4%BA%A7%E7%AE%A1%E7%90%86/%E6%BA%90%E4%BB%A3%E7%A0%81/con_assets";
+			String url = "svn://172.16.0.155:9999/jcsvn/%E5%90%89%E6%9E%97%E7%9C%81%E6%9C%BA%E8%A6%81%E5%B1%80%E9%A1%B9%E7%9B%AE/%E8%A1%8C%E6%94%BF%E5%8A%9E%E5%85%AC%E3%80%81%E5%A4%84%E5%AE%A4%E5%B9%B3%E5%8F%B0/code/equipmentsys";
 			String username = "liubq";
 			String password = "lbq123456";
-			chageList.add(new SVNVersion(url, username, password, 185460L));
+			chageList.add(new SVNVersion(url, username, password, 171118L));
 			SysLog.log(" 开始执行请等待。。。。。。  ");
 			// 根据版本取得差异文件
 			IListDiffOper oper = new ListDiffBySVN(chageList);
@@ -38,7 +30,7 @@ public class PackerV2Main {
 			if (size == 0) {
 				SysLog.log("取得变化文件个数：" + size);
 			}
-			SysLog.log("取得变化文件 size=" + size);
+			SysLog.log("******************************************************");
 			// 打包
 			DiffFilePacker p = new DiffFilePacker(projectTomcat, exportSavePath);
 			p.pack(list);

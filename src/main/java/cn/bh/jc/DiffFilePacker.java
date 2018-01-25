@@ -8,6 +8,7 @@ import java.util.List;
 
 import cn.bh.jc.common.FileCopy;
 import cn.bh.jc.common.PathUtil;
+import cn.bh.jc.common.SysLog;
 
 /**
  * 变更文件打包工具
@@ -37,14 +38,17 @@ public class DiffFilePacker {
 	}
 
 	/**
-	 * 运行
+	 * 打包运行
 	 * 
-	 * @param fileNameList 打包文件列表
+	 * @param fileNameList 文件列表
+	 * @return 被打包的文件列表
+	 * @throws Exception
 	 */
-	public void pack(List<String> fileNameList) throws Exception {
+	public List<String> pack(List<String> fileNameList) throws Exception {
+		// 实际打包的文件
+		List<String> actFileList = new ArrayList<String>();
 		if (fileNameList == null || fileNameList.size() == 0) {
-			System.out.println("打包失败，没有找到变更文件");
-			return;
+			return actFileList;
 		}
 		// 取得变更文件对应可执行文件
 		File tomcatProjectDir = new File(projectTomcat);
@@ -57,25 +61,29 @@ public class DiffFilePacker {
 
 		});
 		// 拷贝文件
-		System.out.println("\r\n************************************************************");
-		System.out.println("开始复制");
+		SysLog.log("\r\n************************************************************");
+		SysLog.log("开始复制");
 		int len = tomcatProjectDir.getParentFile().getAbsolutePath().length() + 1;
 		File newFile;
-		int count = 0;
 		for (File f : exeChangeFileList) {
+			// 目录不用拷贝
+			if (f.isDirectory()) {
+				continue;
+			}
 			newFile = new File(exportSavePath + "/" + f.getAbsolutePath().substring(len));
 			if (!newFile.getParentFile().exists()) {
 				newFile.mkdirs();
 			}
 			try {
 				FileCopy.copyFile(f, newFile);
-				count++;
+				actFileList.add(newFile.getAbsolutePath());
 			} catch (Exception e) {
-				e.printStackTrace();
+				SysLog.log("文件复制异常", e);
 			}
 		}
-		System.out.println("打包完成 共打包" + count + "个文件");
-		System.out.println("************************************************************");
+		SysLog.log("打包完成 共打包" + actFileList.size() + "个文件");
+		SysLog.log("************************************************************");
+		return actFileList;
 	}
 
 	/**
@@ -102,7 +110,7 @@ public class DiffFilePacker {
 				}
 			}
 			if (!find) {
-				System.out.print("文件(" + fileName + ")该在tomcat下(" + dir + ")没有找到对应文件，可能该文件已经被删除，跳过，请确认是否正确！");
+				SysLog.log("文件(" + fileName + ")该在tomcat下(" + dir + ")没有找到对应文件，可能该文件已经被删除，跳过，请确认是否正确！");
 			}
 		}
 		return exeChangeFileList;
