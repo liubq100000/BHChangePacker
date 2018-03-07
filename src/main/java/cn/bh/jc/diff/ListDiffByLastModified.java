@@ -2,7 +2,9 @@ package cn.bh.jc.diff;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import cn.bh.jc.IListDiffOper;
 import cn.bh.jc.common.PathUtil;
@@ -15,7 +17,7 @@ import cn.bh.jc.vo.TimeVersion;
  * @author liubq
  * @since 2017年12月19日
  */
-public class ListDiffByLastModified implements IListDiffOper {
+public class ListDiffByLastModified implements IListDiffOper<TimeVersion> {
 
 	// 项目目录
 	private List<TimeVersion> changeList;
@@ -37,9 +39,10 @@ public class ListDiffByLastModified implements IListDiffOper {
 	/**
 	 * 取得差异文件
 	 */
-	public List<String> listChangeFile() throws Exception {
-		List<String> fileNameList = new ArrayList<String>();
+	public Map<TimeVersion, List<String>> listChangeFile() throws Exception {
+		Map<TimeVersion, List<String>> mapList = new HashMap<TimeVersion, List<String>>();
 		for (TimeVersion timeVersion : changeList) {
+			List<String> fileNameList = new ArrayList<String>();
 			// 取得变化文件列表
 			List<File> changeFileList = timeVersion.listAllChangeFileName();
 			File projectFile = new File(timeVersion.getProjectPath());
@@ -47,8 +50,9 @@ public class ListDiffByLastModified implements IListDiffOper {
 			for (File cf : changeFileList) {
 				fileNameList.add(PathUtil.trimName(cf, projectFile));
 			}
+			mapList.put(timeVersion, fileNameList);
 		}
-		return fileNameList;
+		return mapList;
 	}
 
 }

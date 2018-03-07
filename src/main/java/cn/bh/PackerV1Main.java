@@ -2,11 +2,13 @@ package cn.bh;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import cn.bh.jc.DiffFilePacker;
 import cn.bh.jc.IListDiffOper;
 import cn.bh.jc.common.SysLog;
 import cn.bh.jc.diff.ListDiffByLastModified;
+import cn.bh.jc.vo.StoreVersion;
 import cn.bh.jc.vo.TimeVersion;
 
 /**
@@ -25,17 +27,14 @@ public class PackerV1Main {
 			String projectTomcat = "D:\\tomcat\\webapps\\con_assets1";
 			// 工程地址
 			List<TimeVersion> changeList = new ArrayList<TimeVersion>();
-			changeList.add(new TimeVersion("X:\\workspace\\con_assets", "2017-12-20 23:59:59"));
+			changeList.add(new TimeVersion(projectTomcat, "X:\\workspace\\con_assets", "2017-12-20 23:59:59"));
 			SysLog.log(" 开始支持请等待   ");
 			// 根据版本取得差异文件
-			IListDiffOper oper = new ListDiffByLastModified(changeList);
-			List<String> list = oper.listChangeFile();
-			for (String line : list) {
-				SysLog.log(line);
-			}
+			IListDiffOper<TimeVersion> oper = new ListDiffByLastModified(changeList);
+			Map<? extends StoreVersion, List<String>> mapList = oper.listChangeFile();
 			// 打包
-			DiffFilePacker p = new DiffFilePacker(projectTomcat);
-			p.pack(list);
+			DiffFilePacker p = new DiffFilePacker();
+			p.pack(mapList);
 
 		} catch (Exception e) {
 			SysLog.log("异常", e);

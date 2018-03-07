@@ -13,7 +13,7 @@ import cn.bh.jc.common.TimeWorker;
  * @author liubq
  * @since 2018年1月16日
  */
-public class TimeVersion {
+public class TimeVersion extends StoreVersion {
 	// 项目目录
 	private String projectPath;
 	// 输入时间
@@ -26,11 +26,12 @@ public class TimeVersion {
 	/**
 	 * 时间变化版本
 	 * 
-	 * @param projectPath
-	 * @param time
+	 * @param target 可运行程序（编译后程序）保存地址
+	 * @param projectPath 项目工程地址
+	 * @param time 开始时间
 	 * @throws Exception
 	 */
-	public TimeVersion(String projectPath, String time) throws Exception {
+	public TimeVersion(String target, String projectPath, String time) throws Exception {
 		super();
 		this.projectPath = PathUtil.replace(projectPath);
 		this.time = time;

@@ -11,7 +11,7 @@ import cn.bh.jc.common.SVNWorker;
  * @author liubq
  * @since 2018年1月16日
  */
-public class SVNVersion {
+public class SVNVersion extends StoreVersion {
 	// svn地址
 	private String svnUrl;
 	// 用户名称
@@ -30,14 +30,16 @@ public class SVNVersion {
 	/**
 	 * SVN变化版本
 	 * 
+	 * @param target 可运行程序（编译后程序）保存地址
 	 * @param inSvnUrl svn 地址
 	 * @param name 用户名称
 	 * @param pwd 用户密码
 	 * @param startVersion 开始版本号
 	 * @throws Exception
 	 */
-	public SVNVersion(String inSvnUrl, String name, String pwd, Long startVersion) throws Exception {
+	public SVNVersion(String target, String inSvnUrl, String name, String pwd, Long startVersion) throws Exception {
 		super();
+		this.setTargetPath(target);
 		this.svnUrl = inSvnUrl;
 		String tempSvnUrl = svnUrl;
 		tempSvnUrl = PathUtil.replace(tempSvnUrl);

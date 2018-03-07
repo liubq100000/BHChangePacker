@@ -5,10 +5,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import cn.bh.jc.common.FileCopy;
 import cn.bh.jc.common.PathUtil;
 import cn.bh.jc.common.SysLog;
+import cn.bh.jc.vo.StoreVersion;
 
 /**
  * 变更文件打包工具
@@ -21,17 +23,12 @@ public class DiffFilePacker {
 	// 保存目录
 	private String exportSavePath;
 
-	// 配置
-	private String projectTomcat;
-
 	/**
 	 * 变更文件打包工具
 	 * 
-	 * @param inProjectTomcat tomcat下工程路径 例如：D:\tomcat7575\webapps\equipmentsys
 	 * @param inPath 打包文件保存路径 例如：C:\\Users\\Administrator\\Desktop\\test
 	 */
-	public DiffFilePacker(String inProjectTomcat) {
-		this.projectTomcat = PathUtil.replace(inProjectTomcat);
+	public DiffFilePacker() {
 		this.exportSavePath = PathUtil.SAVE_PATH + "/upgrade_" + System.currentTimeMillis();
 		File file = new File(exportSavePath);
 		file.mkdirs();
@@ -40,45 +37,50 @@ public class DiffFilePacker {
 	/**
 	 * 打包运行
 	 * 
-	 * @param fileNameList 文件列表
+	 * @param mapList 文件列表
 	 * @return 被打包的文件列表
 	 * @throws Exception
 	 */
-	public List<String> pack(List<String> fileNameList) throws Exception {
+	public List<String> pack(Map<? extends StoreVersion, List<String>> mapList) throws Exception {
 		// 实际打包的文件
 		List<String> actFileList = new ArrayList<String>();
-		if (fileNameList == null || fileNameList.size() == 0) {
+		if (mapList == null || mapList.size() == 0) {
 			return actFileList;
 		}
-		// 取得变更文件对应可执行文件
-		File tomcatProjectDir = new File(projectTomcat);
-		List<File> exeChangeFileList = findChangeFile(tomcatProjectDir, fileNameList);
-		// 排序
-		Collections.sort(exeChangeFileList, new Comparator<File>() {
-			public int compare(File o1, File o2) {
-				return o1.getAbsolutePath().compareTo(o2.getAbsolutePath());
+		for (Map.Entry<? extends StoreVersion, List<String>> entry : mapList.entrySet()) {
+			// 取得变更文件对应可执行文件
+			File targetFile = new File(entry.getKey().getTargetPath());
+			if (!targetFile.exists()) {
+				throw new Exception("文件路径:" + entry.getKey().getTargetPath() + "不存在");
 			}
+			List<File> exeChangeFileList = findChangeFile(targetFile, entry.getValue());
+			// 排序
+			Collections.sort(exeChangeFileList, new Comparator<File>() {
+				public int compare(File o1, File o2) {
+					return o1.getAbsolutePath().compareTo(o2.getAbsolutePath());
+				}
 
-		});
-		// 拷贝文件
-		SysLog.log("\r\n************************************************************");
-		SysLog.log("开始复制");
-		int len = tomcatProjectDir.getParentFile().getAbsolutePath().length() + 1;
-		File newFile;
-		for (File f : exeChangeFileList) {
-			// 目录不用拷贝
-			if (f.isDirectory()) {
-				continue;
-			}
-			newFile = new File(exportSavePath + "/" + f.getAbsolutePath().substring(len));
-			if (!newFile.getParentFile().exists()) {
-				newFile.mkdirs();
-			}
-			try {
-				FileCopy.copyFile(f, newFile);
-				actFileList.add(newFile.getAbsolutePath());
-			} catch (Exception e) {
-				SysLog.log("文件复制异常", e);
+			});
+			// 拷贝文件
+			SysLog.log("\r\n************************************************************");
+			SysLog.log("开始复制");
+			int len = targetFile.getParentFile().getAbsolutePath().length() + 1;
+			File newFile;
+			for (File f : exeChangeFileList) {
+				// 目录不用拷贝
+				if (f.isDirectory()) {
+					continue;
+				}
+				newFile = new File(exportSavePath + "/" + f.getAbsolutePath().substring(len));
+				if (!newFile.getParentFile().exists()) {
+					newFile.mkdirs();
+				}
+				try {
+					FileCopy.copyFile(f, newFile);
+					actFileList.add(newFile.getAbsolutePath());
+				} catch (Exception e) {
+					SysLog.log("文件复制异常", e);
+				}
 			}
 		}
 		SysLog.log("打包完成 共打包" + actFileList.size() + "个文件");
@@ -89,12 +91,12 @@ public class DiffFilePacker {
 	/**
 	 * 取得变化文件
 	 * 
-	 * @param tomcatProjectDir
+	 * @param targetDir
 	 * @param fileNameList
 	 * @return
 	 */
-	private List<File> findChangeFile(File tomcatProjectDir, List<String> fileNameList) throws Exception {
-		String basePath = tomcatProjectDir.getAbsolutePath();
+	private List<File> findChangeFile(File targetDir, List<String> fileNameList) throws Exception {
+		String basePath = targetDir.getAbsolutePath();
 		File dir;
 		List<File> exeChangeFileList = new ArrayList<File>();
 		boolean find = false;
@@ -110,7 +112,7 @@ public class DiffFilePacker {
 				}
 			}
 			if (!find) {
-				SysLog.log("文件(" + fileName + ")该在tomcat下(" + dir + ")没有找到对应文件，可能该文件已经被删除，跳过，请确认是否正确！");
+				SysLog.log("文件(" + fileName + ")该在目标目录下(" + dir + ")没有找到对应文件，可能该文件已经被删除，跳过，请确认是否正确！");
 			}
 		}
 		return exeChangeFileList;
@@ -126,7 +128,7 @@ public class DiffFilePacker {
 	private File getChangeFileDir(String basePath, String fileName) {
 		fileName = PathUtil.replace(fileName);
 		String dir = fileName.substring(fileName.indexOf("/"), fileName.lastIndexOf("/"));
-		String allDir = PathUtil.replaceToTomcatDir(basePath + "/" + dir);
+		String allDir = PathUtil.replaceToTargetDir(basePath + "/" + dir);
 		return new File(allDir);
 	}
 
@@ -149,7 +151,11 @@ public class DiffFilePacker {
 			inName = PathUtil.trimEx(inFileName);
 			equals = false;
 		}
+		//去掉发布源码
 		String name = file.getName();
+		if (name.endsWith(".java")){
+			return false;
+		}
 		if (!equals) {
 			if (name.startsWith(inName)) {
 				return true;

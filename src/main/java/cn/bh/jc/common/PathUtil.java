@@ -45,7 +45,7 @@ public class PathUtil {
 	 * 
 	 * @return
 	 */
-	public static String replaceToTomcatDir(String path) {
+	public static String replaceToTargetDir(String path) {
 		String inPath = replace(path);
 		inPath = "/" + inPath + "/";
 		for (VSVO entry : resPathList) {

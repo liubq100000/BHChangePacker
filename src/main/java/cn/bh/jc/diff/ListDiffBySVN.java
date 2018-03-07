@@ -1,7 +1,9 @@
 package cn.bh.jc.diff;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import cn.bh.jc.IListDiffOper;
 import cn.bh.jc.common.PathUtil;
@@ -14,7 +16,7 @@ import cn.bh.jc.vo.SVNVersion;
  * @author liubq
  * @since 2017年12月19日
  */
-public class ListDiffBySVN implements IListDiffOper {
+public class ListDiffBySVN implements IListDiffOper<SVNVersion> {
 
 	// 项目目录
 	private List<SVNVersion> changeList;
@@ -35,20 +37,20 @@ public class ListDiffBySVN implements IListDiffOper {
 
 	/**
 	 * 取得差异文件
-	 * 
-	 * @throws Exception
 	 */
-	public List<String> listChangeFile() throws Exception {
-		List<String> fileList = new ArrayList<String>();
+	public Map<SVNVersion, List<String>> listChangeFile() throws Exception {
+		Map<SVNVersion, List<String>> mapList = new HashMap<SVNVersion, List<String>>();
 		for (SVNVersion svnVersion : changeList) {
+			List<String> fileList = new ArrayList<String>();
 			List<String> files = svnVersion.listAllChangeFileName();
 			if (files == null || files.size() == 0) {
-				return fileList;
+				continue;
 			}
 			for (String svnFileName : files) {
 				fileList.add(PathUtil.trimName(svnFileName, svnVersion.getProjectName()));
 			}
+			mapList.put(svnVersion, fileList);
 		}
-		return fileList;
+		return mapList;
 	}
 }
