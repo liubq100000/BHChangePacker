@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import cn.bh.jc.vo.VSVO;
+import cn.bh.jc.domain.PathVO;
 
 /**
  * 工具类
@@ -19,25 +19,22 @@ public class PathUtil {
 	private static List<String> exclusiveList = new ArrayList<String>();
 	// 初始化排除文件列表
 	static {
-		// exclusiveList.add("src/main/resources");
 		exclusiveList.add("target");
 		exclusiveList.add("classes");
 	}
 
 	// 目录对应文件
-	private static List<VSVO> resPathList = new ArrayList<VSVO>();
+	private static List<PathVO> resPathList = new ArrayList<PathVO>();
 	// 初始化目录对应关系
 	static {
-		resPathList.add(new VSVO("/src/main/java/", "/WEB-INF/classes/"));
-		resPathList.add(new VSVO("/src/main/resources/", "/WEB-INF/classes/"));
-		resPathList.add(new VSVO("/src/main/webapp/", "/"));
-		resPathList.add(new VSVO("/src/java/", "/WEB-INF/classes/"));
-		resPathList.add(new VSVO("/src/webapp/", "/"));
-		resPathList.add(new VSVO("/src/", "/WEB-INF/classes/"));
-		resPathList.add(new VSVO("/WebRoot/", "/"));
-		resPathList.add(new VSVO("/WebContent/", "/"));
-		// resPathList.add(new VSVO("/overlays/com.jc.jcap.jcap-static-1.2/",
-		// "/"));
+		resPathList.add(new PathVO("/src/main/java/", "/WEB-INF/classes/"));
+		resPathList.add(new PathVO("/src/main/resources/", "/WEB-INF/classes/"));
+		resPathList.add(new PathVO("/src/main/webapp/", "/"));
+		resPathList.add(new PathVO("/src/java/", "/WEB-INF/classes/"));
+		resPathList.add(new PathVO("/src/webapp/", "/"));
+		resPathList.add(new PathVO("/src/", "/WEB-INF/classes/"));
+		resPathList.add(new PathVO("/WebRoot/", "/"));
+		resPathList.add(new PathVO("/WebContent/", "/"));
 	}
 
 	/**
@@ -48,7 +45,7 @@ public class PathUtil {
 	public static String replaceToTargetDir(String path) {
 		String inPath = replace(path);
 		inPath = "/" + inPath + "/";
-		for (VSVO entry : resPathList) {
+		for (PathVO entry : resPathList) {
 			inPath = inPath.replace(entry.getSrcPath(), entry.getTargetPath());
 		}
 		return replace(inPath);

@@ -1,10 +1,11 @@
-package cn.bh.jc.common;
+package cn.bh.jc.handle;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import cn.bh.jc.vo.TimeVersion;
+import cn.bh.jc.common.PathUtil;
+import cn.bh.jc.domain.TimeVersion;
 
 /**
  * 时间比较工具类
@@ -14,15 +15,29 @@ import cn.bh.jc.vo.TimeVersion;
  */
 public class TimeWorker {
 
+	// 时间比较工具类
+	private TimeVersion version;
+
+	/**
+	 * 时间比较工具类
+	 * 
+	 * @param version 版本
+	 * @param name 用户名称
+	 * @param pwd 名称
+	 */
+	public TimeWorker(TimeVersion version) {
+		this.version = version;
+	}
+
 	/**
 	 * 列出所有变化文件
 	 * 
 	 * @param file
 	 * @return
 	 */
-	public List<File> listAllChangeFile(TimeVersion timeVersion) {
-		File file = new File(timeVersion.getProjectPath());
-		return listChangeFile(file, timeVersion);
+	public List<File> listAllChangeFile() {
+		File file = new File(version.getProjectPath());
+		return listChangeFile(file, version);
 	}
 
 	/**

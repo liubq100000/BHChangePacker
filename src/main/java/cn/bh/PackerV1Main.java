@@ -2,14 +2,12 @@ package cn.bh;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import cn.bh.jc.DiffFilePacker;
-import cn.bh.jc.IListDiffOper;
+import cn.bh.jc.ListDiffOper;
 import cn.bh.jc.common.SysLog;
-import cn.bh.jc.diff.ListDiffByLastModified;
-import cn.bh.jc.vo.StoreVersion;
-import cn.bh.jc.vo.TimeVersion;
+import cn.bh.jc.domain.ChangeVO;
+import cn.bh.jc.domain.TimeVersion;
 
 /**
  * 最后修改时间比较方式打包
@@ -24,18 +22,18 @@ public class PackerV1Main {
 	public static void main(String[] args) {
 		try {
 			// 工程所用的tomcat地址（主要是为了Copy class等文件）
-			String projectTomcat = "D:\\tomcat\\webapps\\con_assets1";
+			String projectTomcat = "D:\\tomcat\\webapps\\wsb_forum";
 			// 工程地址
 			List<TimeVersion> changeList = new ArrayList<TimeVersion>();
-			changeList.add(new TimeVersion(projectTomcat, "X:\\workspace\\con_assets", "2017-12-20 23:59:59"));
+			changeList.add(new TimeVersion(projectTomcat, "X:\\workspace\\wsb_forum", "2017-04-12 23:59:59"));
 			SysLog.log(" 开始支持请等待   ");
 			// 根据版本取得差异文件
-			IListDiffOper<TimeVersion> oper = new ListDiffByLastModified(changeList);
-			Map<? extends StoreVersion, List<String>> mapList = oper.listChangeFile();
+			ListDiffOper<TimeVersion> oper = new ListDiffOper<TimeVersion>(changeList);
+			List<ChangeVO> list = oper.listChange();
 			// 打包
 			DiffFilePacker p = new DiffFilePacker();
-			p.pack(mapList);
-
+			p.pack(list);
+			SysLog.log("\r\n 处理完成   ");
 		} catch (Exception e) {
 			SysLog.log("异常", e);
 		}

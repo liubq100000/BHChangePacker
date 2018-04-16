@@ -1,4 +1,4 @@
-package cn.bh.jc.vo;
+package cn.bh.jc.domain;
 
 /**
  * 变化文件
@@ -6,11 +6,11 @@ package cn.bh.jc.vo;
  * @author liubq
  * @since 2018年1月4日
  */
-public class VSVO {
+public class PathVO {
 	private String srcPath;
 	private String targetPath;
 
-	public VSVO(String srcPath, String targetPath) {
+	public PathVO(String srcPath, String targetPath) {
 		super();
 		this.srcPath = srcPath;
 		this.targetPath = targetPath;

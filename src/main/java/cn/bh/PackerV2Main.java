@@ -2,14 +2,12 @@ package cn.bh;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import cn.bh.jc.DiffFilePacker;
-import cn.bh.jc.IListDiffOper;
+import cn.bh.jc.ListDiffOper;
 import cn.bh.jc.common.SysLog;
-import cn.bh.jc.diff.ListDiffBySVN;
-import cn.bh.jc.vo.SVNVersion;
-import cn.bh.jc.vo.StoreVersion;
+import cn.bh.jc.domain.ChangeVO;
+import cn.bh.jc.domain.SVNVersion;
 
 /**
  * SVN方式打包
@@ -24,19 +22,21 @@ public class PackerV2Main {
 	public static void main(String[] args) {
 		try {
 			// 工程所用的tomcat地址（主要是为了Copy class等文件）
-			String projectTomcat = "D:\\tomcat\\webapps\\con_assets";
+			String exeHome = "D:\\tomcat\\webapps\\wsb_forum";
 			List<SVNVersion> chageList = new ArrayList<SVNVersion>();
-			String url = "svn://172.16.0.155:9999/jcsvn/%E5%90%89%E6%9E%97%E7%9C%81%E9%A3%9F%E5%93%81%E8%8D%AF%E5%93%81%E7%9B%91%E7%9D%A3%E7%AE%A1%E7%90%86%E5%B1%80%E9%A1%B9%E7%9B%AE/%E8%8D%AF%E6%A3%80%E6%89%80%E9%A1%B9%E7%9B%AE/%E5%BC%80%E5%8F%91%E7%9B%B8%E5%85%B3/%E8%B5%84%E4%BA%A7%E7%AE%A1%E7%90%86/%E6%BA%90%E4%BB%A3%E7%A0%81/con_assets";
+			String url = "svn://172.16.0.155:9999/jcsvn/JC2018-003%E5%90%89%E6%9E%97%E7%9C%81%E5%A4%96%E4%BA%8B%E5%8A%9E%E6%8A%A5%E5%90%8D%E5%8F%8A%E7%BB%9F%E8%AE%A1%E9%A1%B9%E7%9B%AE/01%E5%BC%80%E5%8F%91%E5%9F%9F/03%E7%BC%96%E7%A0%81%E5%AE%9E%E7%8E%B0/wsb_forum";
 			String username = "liubq";
 			String password = "lbq123456";
-			chageList.add(new SVNVersion(projectTomcat, url, username, password, 185460L));
-			SysLog.log(" 开始执行请等待。。。。。。  ");
+			chageList.add(new SVNVersion(exeHome, url, username, password, 193000L));
+			SysLog.log("开始执行请等待。。。。。。  ");
 			// 根据版本取得差异文件
-			IListDiffOper<SVNVersion> oper = new ListDiffBySVN(chageList);
-			Map<? extends StoreVersion, List<String>> mapList = oper.listChangeFile();
+			ListDiffOper<SVNVersion> oper = new ListDiffOper<SVNVersion>(chageList);
+			List<ChangeVO> list = oper.listChange();
 			// 打包
 			DiffFilePacker p = new DiffFilePacker();
-			p.pack(mapList);
+			p.pack(list);
+
+			SysLog.log("\r\n 处理完成 。。。。。。    ");
 		} catch (Exception e) {
 			SysLog.log("异常", e);
 		}

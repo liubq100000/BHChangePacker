@@ -1,16 +1,18 @@
 package cn.bh.jc;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import cn.bh.jc.common.FileCopy;
 import cn.bh.jc.common.PathUtil;
 import cn.bh.jc.common.SysLog;
-import cn.bh.jc.vo.StoreVersion;
+import cn.bh.jc.domain.ChangeVO;
 
 /**
  * 变更文件打包工具
@@ -22,6 +24,8 @@ public class DiffFilePacker {
 
 	// 保存目录
 	private String exportSavePath;
+	// 删除文件列表
+	private String deleteFile;
 
 	/**
 	 * 变更文件打包工具
@@ -32,6 +36,7 @@ public class DiffFilePacker {
 		this.exportSavePath = PathUtil.SAVE_PATH + "/upgrade_" + System.currentTimeMillis();
 		File file = new File(exportSavePath);
 		file.mkdirs();
+
 	}
 
 	/**
@@ -41,19 +46,20 @@ public class DiffFilePacker {
 	 * @return 被打包的文件列表
 	 * @throws Exception
 	 */
-	public List<String> pack(Map<? extends StoreVersion, List<String>> mapList) throws Exception {
+	public List<String> pack(List<ChangeVO> cList) throws Exception {
 		// 实际打包的文件
 		List<String> actFileList = new ArrayList<String>();
-		if (mapList == null || mapList.size() == 0) {
+		if (cList == null || cList.size() == 0) {
 			return actFileList;
 		}
-		for (Map.Entry<? extends StoreVersion, List<String>> entry : mapList.entrySet()) {
+		for (ChangeVO entry : cList) {
+			List<String> propertiesFileList = new ArrayList<String>();
 			// 取得变更文件对应可执行文件
-			File targetFile = new File(entry.getKey().getTargetPath());
+			File targetFile = new File(entry.getVersion().getTargetPath());
 			if (!targetFile.exists()) {
-				throw new Exception("文件路径:" + entry.getKey().getTargetPath() + "不存在");
+				throw new Exception("文件路径:" + entry.getVersion().getTargetPath() + "不存在");
 			}
-			List<File> exeChangeFileList = findChangeFile(targetFile, entry.getValue());
+			List<File> exeChangeFileList = findChangeFile(targetFile, entry.getInfo().getChangeFiles());
 			// 排序
 			Collections.sort(exeChangeFileList, new Comparator<File>() {
 				public int compare(File o1, File o2) {
@@ -62,8 +68,7 @@ public class DiffFilePacker {
 
 			});
 			// 拷贝文件
-			SysLog.log("\r\n************************************************************");
-			SysLog.log("开始复制");
+			SysLog.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 			int len = targetFile.getParentFile().getAbsolutePath().length() + 1;
 			File newFile;
 			for (File f : exeChangeFileList) {
@@ -78,13 +83,47 @@ public class DiffFilePacker {
 				try {
 					FileCopy.copyFile(f, newFile);
 					actFileList.add(newFile.getAbsolutePath());
+					// 特殊文件记录，用户提醒
+					if (newFile.getAbsolutePath().endsWith(".properties")) {
+						propertiesFileList.add(newFile.getAbsolutePath());
+					}
 				} catch (Exception e) {
 					SysLog.log("文件复制异常", e);
 				}
 			}
+			Set<String> delList = entry.getInfo().getDelSet();
+			if (delList != null && delList.size() > 0) {
+				SysLog.log("\r\n删除文件列表---------------------------------");
+				String delBasePath = "tomcat\\webapp\\";
+				File delFile = new File(exportSavePath + "/" + entry.getVersion().getProjectName() + "_删除文件列表.txt");
+				deleteFile = delFile.getAbsolutePath();
+				StringBuilder delTxt = new StringBuilder();
+				String newLine;
+				for (String line : delList) {
+					line = PathUtil.replace(line);
+					newLine = delBasePath + PathUtil.replaceToTargetDir(line);
+					newLine = PathUtil.replace(newLine);
+					delTxt.append(newLine + "\r\n");
+					SysLog.log(newLine);
+				}
+				Files.write(Paths.get(deleteFile), delTxt.toString().getBytes());
+				SysLog.log("删除文件列表---------------------------------");
+			}
+			// 配置文件，打印处理提醒使用者
+			if (propertiesFileList.size() > 0) {
+				SysLog.log("\r\n配置文件变化列表，请手动检查是否需要@@@@@@@@@@@@@@@@");
+				for (String line : propertiesFileList) {
+					SysLog.log(line);
+				}
+				SysLog.log("配置文件变化列表，请手动检查是否需要@@@@@@@@@@@@@@@@");
+			}
+			SysLog.log("\r\n" + entry.getVersion().getTargetPath() + " 打包完成");
+			SysLog.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 		}
-		SysLog.log("打包完成 共打包" + actFileList.size() + "个文件");
+
+		SysLog.log("\r\n打包完成 共打包" + actFileList.size() + "个文件");
 		SysLog.log("************************************************************");
+
 		return actFileList;
 	}
 
@@ -151,9 +190,9 @@ public class DiffFilePacker {
 			inName = PathUtil.trimEx(inFileName);
 			equals = false;
 		}
-		//去掉发布源码
+		// 去掉发布源码
 		String name = file.getName();
-		if (name.endsWith(".java")){
+		if (name.endsWith(".java")) {
 			return false;
 		}
 		if (!equals) {
