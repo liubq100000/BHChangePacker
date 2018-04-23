@@ -25,7 +25,7 @@ public class PackerV1Main {
 			String projectTomcat = "D:\\tomcat\\webapps\\wsb_forum";
 			// 工程地址
 			List<TimeVersion> changeList = new ArrayList<TimeVersion>();
-			changeList.add(new TimeVersion(projectTomcat, "X:\\workspace\\wsb_forum", "2017-04-12 23:59:59"));
+			changeList.add(new TimeVersion(projectTomcat, "X:\\workspace\\wsb_forum", "2018-04-01 23:59:59"));
 			SysLog.log(" 开始支持请等待   ");
 			// 根据版本取得差异文件
 			ListDiffOper<TimeVersion> oper = new ListDiffOper<TimeVersion>(changeList);

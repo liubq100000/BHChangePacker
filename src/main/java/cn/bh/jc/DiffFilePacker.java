@@ -59,6 +59,7 @@ public class DiffFilePacker {
 			if (!targetFile.exists()) {
 				throw new Exception("文件路径:" + entry.getVersion().getTargetPath() + "不存在");
 			}
+			// 查询变化文件
 			List<File> exeChangeFileList = findChangeFile(targetFile, entry.getInfo().getChangeFiles());
 			// 排序
 			Collections.sort(exeChangeFileList, new Comparator<File>() {
@@ -69,14 +70,16 @@ public class DiffFilePacker {
 			});
 			// 拷贝文件
 			SysLog.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-			int len = targetFile.getParentFile().getAbsolutePath().length() + 1;
+			int len = targetFile.getAbsolutePath().length() + 1;
 			File newFile;
+			// 保存的文件前缀
+			String saveFilePre = exportSavePath + "/" + entry.getVersion().getExportProjectName() + "/";
 			for (File f : exeChangeFileList) {
 				// 目录不用拷贝
 				if (f.isDirectory()) {
 					continue;
 				}
-				newFile = new File(exportSavePath + "/" + f.getAbsolutePath().substring(len));
+				newFile = new File(saveFilePre + f.getAbsolutePath().substring(len));
 				if (!newFile.getParentFile().exists()) {
 					newFile.mkdirs();
 				}
@@ -166,7 +169,7 @@ public class DiffFilePacker {
 	 */
 	private File getChangeFileDir(String basePath, String fileName) {
 		fileName = PathUtil.replace(fileName);
-		String dir = fileName.substring(fileName.indexOf("/"), fileName.lastIndexOf("/"));
+		String dir = fileName.substring(0, fileName.lastIndexOf("/"));
 		String allDir = PathUtil.replaceToTargetDir(basePath + "/" + dir);
 		return new File(allDir);
 	}

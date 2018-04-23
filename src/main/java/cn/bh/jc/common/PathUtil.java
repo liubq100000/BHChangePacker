@@ -91,27 +91,14 @@ public class PathUtil {
 	 * 
 	 * @param svnFile
 	 * @param projectName
-	 * @return
+	 * @return 不包含工程名称的相对地址
 	 */
 	public static String trimName(String svnFile, String projectName) {
 		if (svnFile.length() <= projectName.length()) {
 			return svnFile;
 		}
-		String tSvnFile = svnFile.substring(svnFile.indexOf(projectName));
+		String tSvnFile = svnFile.substring(svnFile.indexOf(projectName) + projectName.length());
 		return PathUtil.replace(tSvnFile);
-	}
-
-	/**
-	 * 剪切出具体名称
-	 * 
-	 * @param file
-	 * @param baseFile
-	 * @return
-	 */
-	public static String trimName(File file, File baseFile) {
-		String baseFilePath = PathUtil.replace(baseFile.getParentFile().getAbsolutePath());
-		String nowFilePath = PathUtil.replace(file.getAbsolutePath());
-		return nowFilePath.substring(baseFilePath.length() + 1);
 	}
 
 	/**

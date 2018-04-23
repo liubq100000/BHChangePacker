@@ -19,6 +19,8 @@ public class TimeVersion extends StoreVersion {
 	private final String projectPath;
 	// 项目名称
 	private final String projectName;
+	// 导出工程名称
+	private final String exportProjectName;
 	// 输入时间
 	private final String time;
 	// 开始时间
@@ -35,13 +37,31 @@ public class TimeVersion extends StoreVersion {
 	 * @throws Exception
 	 */
 	public TimeVersion(String target, String inProjectPath, String time) throws Exception {
+		this(target, inProjectPath, time, null);
+	}
+
+	/**
+	 * 时间变化版本
+	 * 
+	 * @param target 可运行程序（编译后程序）保存地址
+	 * @param inProjectPath 项目工程地址
+	 * @param time 开始时间
+	 * @param inExportProjectName 导出工程名称
+	 * @throws Exception
+	 */
+	public TimeVersion(String target, String inProjectPath, String time, String inExportProjectName) throws Exception {
 		super();
 		this.setTargetPath(target);
 		this.projectPath = PathUtil.replace(inProjectPath);
 		this.projectName = projectPath.substring(projectPath.lastIndexOf("/") + 1);
-		// 检查
-		if (!this.getTargetPath().endsWith(projectName)) {
-			throw new Exception("可执行工程(" + target + ") 和目标工程(" + projectPath + ")的工程名称不统一，目前该系统处理不了 ");
+		if (inExportProjectName == null || inExportProjectName.trim().length() == 0) {
+			// 检查
+			if (!this.getTargetPath().endsWith(projectName)) {
+				throw new Exception("可执行工程(" + target + ") 和目标工程(" + inProjectPath + ")的工程名称不统一，目前该系统处理不了 ");
+			}
+			exportProjectName = projectName;
+		} else {
+			exportProjectName = inExportProjectName.trim();
 		}
 		this.time = time;
 		SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -60,11 +80,12 @@ public class TimeVersion extends StoreVersion {
 		resVO.setVersion(this);
 		// 取得变化文件列表
 		List<File> changeFileList = worker.listAllChangeFile();
-		File projectFile = new File(projectPath);
 		// 变成标准地址
+		String tempFile;
 		List<String> changeList = new ArrayList<String>();
 		for (File cf : changeFileList) {
-			changeList.add(PathUtil.trimName(cf, projectFile));
+			tempFile = PathUtil.trimName(cf.getAbsolutePath(), projectName);
+			changeList.add(tempFile);
 		}
 		ChangeInfo resInfo = new ChangeInfo();
 		resInfo.setChangeFiles(changeList);
@@ -84,8 +105,12 @@ public class TimeVersion extends StoreVersion {
 		return beginTime;
 	}
 
+	public String getExportProjectName() {
+		return exportProjectName;
+	}
+
 	@Override
-	public String getProjectName() throws Exception {
+	public String getProjectName() {
 		return projectName;
 	}
 

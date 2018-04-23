@@ -27,6 +27,8 @@ public class SVNVersion extends StoreVersion {
 	private final Long endVersion;
 	// 项目名称
 	private final String projectName;
+	// 导出工程名称
+	private final String exportProjectName;
 	// 工作者
 	private final SVNWorker worker;
 
@@ -41,14 +43,32 @@ public class SVNVersion extends StoreVersion {
 	 * @throws Exception
 	 */
 	public SVNVersion(String target, String inSvnUrl, String name, String pwd, Long startVersion) throws Exception {
+		this(target, inSvnUrl, name, pwd, startVersion, null);
+	}
+
+	/**
+	 * @param target
+	 * @param inSvnUrl
+	 * @param name
+	 * @param pwd
+	 * @param startVersion
+	 * @param inExportProjectName
+	 * @throws Exception
+	 */
+	public SVNVersion(String target, String inSvnUrl, String name, String pwd, Long startVersion, String inExportProjectName) throws Exception {
 		super();
 		this.setTargetPath(target);
 		this.svnUrl = inSvnUrl;
 		String tempSvnUrl = PathUtil.replace(svnUrl);
 		this.projectName = tempSvnUrl.substring(tempSvnUrl.lastIndexOf("/") + 1);
-		// 检查
-		if (!this.getTargetPath().endsWith(projectName)) {
-			throw new Exception("可执行工程(" + target + ") 和目标SVN工程(" + inSvnUrl + ")的工程名称不统一，目前该系统处理不了 ");
+		if (inExportProjectName == null || inExportProjectName.trim().length() == 0) {
+			// 检查
+			if (!this.getTargetPath().endsWith(projectName)) {
+				throw new Exception("可执行工程(" + target + ") 和目标SVN工程(" + inSvnUrl + ")的工程名称不统一，目前该系统处理不了 ");
+			}
+			exportProjectName = projectName;
+		} else {
+			exportProjectName = inExportProjectName.trim();
 		}
 		this.username = name;
 		this.password = pwd;
@@ -75,14 +95,17 @@ public class SVNVersion extends StoreVersion {
 		// SVN，地址转换为标准地址
 		// 变化文件转换
 		List<String> changeFiles = new ArrayList<String>();
+		String tempFile;
 		for (String svnFileName : svnInfo.getChangeFiles()) {
-			changeFiles.add(PathUtil.trimName(svnFileName, this.projectName));
+			tempFile = PathUtil.trimName(svnFileName, this.projectName);
+			changeFiles.add(tempFile);
 		}
 		resVO.getInfo().setChangeFiles(changeFiles);
 		// 删除文件转换
 		Set<String> delSet = new HashSet<String>();
 		for (String svnFileName : svnInfo.getDelSet()) {
-			delSet.add(PathUtil.trimName(svnFileName, this.projectName));
+			tempFile = PathUtil.trimName(svnFileName, this.projectName);
+			delSet.add(tempFile);
 		}
 		resVO.getInfo().setDelSet(delSet);
 		return resVO;
@@ -106,6 +129,10 @@ public class SVNVersion extends StoreVersion {
 
 	public Long getEndVersion() {
 		return endVersion;
+	}
+
+	public String getExportProjectName() {
+		return exportProjectName;
 	}
 
 	public String getProjectName() {

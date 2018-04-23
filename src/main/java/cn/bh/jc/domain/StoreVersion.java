@@ -19,12 +19,18 @@ public abstract class StoreVersion {
 	public abstract ChangeVO get() throws Exception;
 
 	/**
-	 * 取得名称
+	 * 取得工程名称
 	 * 
-	 * @return
-	 * @throws Exception
+	 * @return 工程名称
 	 */
-	public abstract String getProjectName() throws Exception;
+	public abstract String getProjectName();
+
+	/**
+	 * 取得导出工程名称
+	 * 
+	 * @return 导出工程名称
+	 */
+	public abstract String getExportProjectName();
 
 	// 可运行程序执行保存地址
 	private String targetPath;
