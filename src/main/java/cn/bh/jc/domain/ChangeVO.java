@@ -1,5 +1,7 @@
 package cn.bh.jc.domain;
 
+import cn.bh.jc.version.StoreVersion;
+
 /**
  * 变化目录
  * 

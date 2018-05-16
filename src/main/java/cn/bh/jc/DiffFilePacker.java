@@ -120,7 +120,7 @@ public class DiffFilePacker {
 				}
 				SysLog.log("配置文件变化列表，请手动检查是否需要@@@@@@@@@@@@@@@@");
 			}
-			SysLog.log("\r\n" + entry.getVersion().getTargetPath() + " 打包完成");
+			SysLog.log("\r\n 项目：" + entry.getVersion().getProjectName() + " 打包完成，打包到地址：" + saveFilePre);
 			SysLog.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 		}
 
@@ -169,9 +169,15 @@ public class DiffFilePacker {
 	 */
 	private File getChangeFileDir(String basePath, String fileName) {
 		fileName = PathUtil.replace(fileName);
-		String dir = fileName.substring(0, fileName.lastIndexOf("/"));
-		String allDir = PathUtil.replaceToTargetDir(basePath + "/" + dir);
-		return new File(allDir);
+		if (fileName.lastIndexOf("/") >= 0) {
+			String dir = fileName.substring(0, fileName.lastIndexOf("/"));
+			String allDir = PathUtil.replaceToTargetDir(basePath + "/" + dir);
+			return new File(allDir);
+		} else {
+			String allDir = PathUtil.replaceToTargetDir(basePath + "/" + fileName);
+			return new File(allDir);
+		}
+
 	}
 
 	/**

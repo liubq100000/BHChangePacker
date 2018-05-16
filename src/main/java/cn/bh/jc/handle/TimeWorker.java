@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cn.bh.jc.common.PathUtil;
-import cn.bh.jc.domain.TimeVersion;
+import cn.bh.jc.version.TimeVersion;
 
 /**
  * 时间比较工具类

@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cn.bh.jc.DiffFilePacker;
-import cn.bh.jc.ListDiffOper;
+import cn.bh.jc.DiffFileLister;
 import cn.bh.jc.common.SysLog;
 import cn.bh.jc.domain.ChangeVO;
-import cn.bh.jc.domain.TimeVersion;
+import cn.bh.jc.version.TimeVersion;
 
 /**
  * 最后修改时间比较方式打包
@@ -28,7 +28,7 @@ public class PackerV1Main {
 			changeList.add(new TimeVersion(projectTomcat, "X:\\workspace\\wsb_forum", "2018-04-01 23:59:59"));
 			SysLog.log(" 开始支持请等待   ");
 			// 根据版本取得差异文件
-			ListDiffOper<TimeVersion> oper = new ListDiffOper<TimeVersion>(changeList);
+			DiffFileLister<TimeVersion> oper = new DiffFileLister<TimeVersion>(changeList);
 			List<ChangeVO> list = oper.listChange();
 			// 打包
 			DiffFilePacker p = new DiffFilePacker();

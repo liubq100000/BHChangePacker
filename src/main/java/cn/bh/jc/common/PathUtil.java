@@ -32,9 +32,15 @@ public class PathUtil {
 		resPathList.add(new PathVO("/src/main/webapp/", "/"));
 		resPathList.add(new PathVO("/src/java/", "/WEB-INF/classes/"));
 		resPathList.add(new PathVO("/src/webapp/", "/"));
+		resPathList.add(new PathVO("/src/WebRoot/", "/"));
+		resPathList.add(new PathVO("/src/webroot/", "/"));
+		resPathList.add(new PathVO("/src/WebContent/", "/"));
+		resPathList.add(new PathVO("/src/webcontent/", "/"));
 		resPathList.add(new PathVO("/src/", "/WEB-INF/classes/"));
 		resPathList.add(new PathVO("/WebRoot/", "/"));
 		resPathList.add(new PathVO("/WebContent/", "/"));
+		resPathList.add(new PathVO("/webroot/", "/"));
+		resPathList.add(new PathVO("/webcontent/", "/"));
 	}
 
 	/**

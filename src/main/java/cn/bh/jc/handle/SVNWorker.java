@@ -20,7 +20,7 @@ import org.tmatesoft.svn.core.wc.SVNWCUtil;
 import cn.bh.jc.common.PathUtil;
 import cn.bh.jc.common.SysLog;
 import cn.bh.jc.domain.ChangeInfo;
-import cn.bh.jc.domain.SVNVersion;
+import cn.bh.jc.version.SVNVersion;
 
 /**
  * SVN工具类
