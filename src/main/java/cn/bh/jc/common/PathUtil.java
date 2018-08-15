@@ -14,7 +14,6 @@ import cn.bh.jc.domain.PathVO;
  */
 public class PathUtil {
 	// 文件保存
-	public static final String SAVE_PATH = "C:/Users/Administrator/Desktop";
 	// 排除的文件目录
 	private static List<String> exclusiveList = new ArrayList<String>();
 	// 初始化排除文件列表

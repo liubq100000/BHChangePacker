@@ -32,8 +32,23 @@ public class DiffFilePacker {
 	 * 
 	 * @param inPath 打包文件保存路径 例如：C:\\Users\\Administrator\\Desktop\\test
 	 */
-	public DiffFilePacker() {
-		this.exportSavePath = PathUtil.SAVE_PATH + "/upgrade_" + System.currentTimeMillis();
+	public DiffFilePacker(String savePath) {
+		if (savePath == null || savePath.trim().length() == 0) {
+			SysLog.log("请输入保存路径");
+			throw new RuntimeException("请输入保存路径");
+		}
+		File saveDir = new File(savePath);
+		try {
+			saveDir.mkdirs();
+			if (!saveDir.isDirectory()) {
+				SysLog.log("保存路径必须是目录");
+				throw new RuntimeException("保存路径必须是目录");
+			}
+		} catch (Exception ex) {
+			SysLog.log("保存路径创建不成功");
+			throw new RuntimeException(ex);
+		}
+		this.exportSavePath = saveDir.getAbsolutePath() + "/upgrade_" + System.currentTimeMillis();
 		File file = new File(exportSavePath);
 		file.mkdirs();
 

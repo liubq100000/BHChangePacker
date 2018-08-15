@@ -1,10 +1,10 @@
-package cn.bh;
+package cn.bh.view.simple;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import cn.bh.jc.DiffFilePacker;
 import cn.bh.jc.DiffFileLister;
+import cn.bh.jc.DiffFilePacker;
 import cn.bh.jc.common.SysLog;
 import cn.bh.jc.domain.ChangeVO;
 import cn.bh.jc.version.TimeVersion;
@@ -31,7 +31,7 @@ public class PackerV1Main {
 			DiffFileLister<TimeVersion> oper = new DiffFileLister<TimeVersion>(changeList);
 			List<ChangeVO> list = oper.listChange();
 			// 打包
-			DiffFilePacker p = new DiffFilePacker();
+			DiffFilePacker p = new DiffFilePacker("C:/Users/Administrator/Desktop");
 			p.pack(list);
 			SysLog.log("\r\n 处理完成   ");
 		} catch (Exception e) {

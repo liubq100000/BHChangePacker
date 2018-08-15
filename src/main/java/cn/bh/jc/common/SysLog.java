@@ -1,6 +1,5 @@
 package cn.bh.jc.common;
 
-
 /**
  * 日志文件
  * 
@@ -8,6 +7,8 @@ package cn.bh.jc.common;
  * @since 2018年1月25日
  */
 public class SysLog {
+
+	public static ILoglisten logListen = null;
 
 	/**
 	 * 日志
@@ -19,7 +20,11 @@ public class SysLog {
 			return;
 		}
 		for (String msg : msgs) {
-			System.out.println(msg);
+			if (logListen != null) {
+				logListen.log(msg);
+			} else {
+				System.out.println(msg);
+			}
 		}
 	}
 
@@ -30,10 +35,21 @@ public class SysLog {
 	 */
 	public static void log(String msg, Throwable e) {
 		if (msg != null) {
-			System.out.println(msg);
+			if (logListen != null) {
+				logListen.log(msg);
+			} else {
+				System.out.println(msg);
+			}
 		}
 		if (e != null) {
-			e.printStackTrace();
+			if (logListen != null) {
+				logListen.log(e.getMessage());
+				for (StackTraceElement item : e.getStackTrace()) {
+					logListen.log(item.toString());
+				}
+			} else {
+				e.printStackTrace();
+			}
 		}
 	}
 
