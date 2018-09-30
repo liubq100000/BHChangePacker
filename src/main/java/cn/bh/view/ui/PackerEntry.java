@@ -197,7 +197,7 @@ public class PackerEntry extends JFrame implements ILoglisten {
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser jfc = new JFileChooser();
 				jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-				jfc.showDialog(new JLabel(), "选择目录");
+				jfc.showDialog(new JLabel(), "选择");
 				File file = jfc.getSelectedFile();
 				if (file != null) {
 					outPosition.setText(file.getAbsolutePath());
@@ -217,7 +217,7 @@ public class PackerEntry extends JFrame implements ILoglisten {
 		srcPosition.setLocation(650, y + UIVO.R_H);
 		srcPosition.setSize(440, UIVO.R_H);
 		srcPosition.setEnabled(false);
-		JButton srcPositionBtn = new JButton("选择");
+		JButton srcPositionBtn = new JButton("选择目录");
 		srcPositionBtn.setLocation(1100, y + UIVO.R_H);
 		srcPositionBtn.setSize(100, UIVO.R_H);
 

@@ -169,7 +169,7 @@ public class DiffFilePacker {
 				}
 			}
 			if (!find) {
-				SysLog.log("文件(" + fileName + ")该在目标目录下(" + dir + ")没有找到对应文件，可能该文件已经被删除，跳过，请确认是否正确！");
+				SysLog.log("文件(" + fileName + ")在目标目录下(" + dir + ")没有找到对应文件，可能该文件已经被删除，跳过，请确认是否正确！");
 			}
 		}
 		return exeChangeFileList;

@@ -35,7 +35,7 @@ public class PathUtil {
 		resPathList.add(new PathVO("/src/webroot/", "/"));
 		resPathList.add(new PathVO("/src/WebContent/", "/"));
 		resPathList.add(new PathVO("/src/webcontent/", "/"));
-		resPathList.add(new PathVO("/src/", "/WEB-INF/classes/"));
+		resPathList.add(new PathVO("/overlays/com.jc.jcap.jcap-static-1.2/", "/"));
 		resPathList.add(new PathVO("/WebRoot/", "/"));
 		resPathList.add(new PathVO("/WebContent/", "/"));
 		resPathList.add(new PathVO("/webroot/", "/"));

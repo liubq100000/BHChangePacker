@@ -1,5 +1,6 @@
 package cn.bh.jc.handle;
 
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -67,7 +68,15 @@ public class SVNWorker {
 		String pwd = version.getPassword();
 		ISVNAuthenticationManager authManager = SVNWCUtil.createDefaultAuthenticationManager(user, pwd.toCharArray());
 		repository.setAuthenticationManager(authManager);
-
+		SVNURL svnRootUrl = repository.getRepositoryRoot(true);
+		if (svnRootUrl == null) {
+			SysLog.log("创建版本库根路径异常");
+			throw new Exception("getRepositoryRoot 异常");
+		}
+		String preSvnUrl = PathUtil.replace(repository.getLocation().toString());
+		preSvnUrl = preSvnUrl.substring(svnRootUrl.toString().length());
+		preSvnUrl = "/" + PathUtil.replace(preSvnUrl);
+		preSvnUrl = URLDecoder.decode(preSvnUrl, "UTF-8");
 		// 下载这个期间内所有变更文件
 		try {
 			long startRevision = version.getStartVersion();
@@ -88,6 +97,9 @@ public class SVNWorker {
 				for (Map.Entry<String, SVNLogEntryPath> entry : log.getChangedPaths().entrySet()) {
 					key = entry.getKey();
 					if (!entry.getValue().getKind().equals(SVNNodeKind.DIR)) {
+						if (!key.startsWith(preSvnUrl)) {
+							continue;
+						}
 						// 排除文件跳过
 						if (isExclusive(key)) {
 							continue;
