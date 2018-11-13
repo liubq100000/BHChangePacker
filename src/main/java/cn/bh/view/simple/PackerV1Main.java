@@ -23,12 +23,12 @@ public class PackerV1Main {
 	public static void main(String[] args) {
 		try {
 			// 工程所用的tomcat地址（主要是为了Copy class等文件）
-			String projectTomcat = "D:\\tomcat\\webapps\\wsb_forum";
+			String projectTomcat = "D:\\tomcat\\webapps\\ROOT";
 			// 配置
 			Config conf = new Config();
 			// 工程地址
 			List<TimeVersion> changeList = new ArrayList<TimeVersion>();
-			changeList.add(new TimeVersion(conf, projectTomcat, "X:\\workspace\\wsb_forum", "2018-04-01 23:59:59"));
+			changeList.add(new TimeVersion(conf, projectTomcat, "X:\\workspace\\xf_statis", "2018-11-10 23:59:59"));
 			SysLog.log(" 开始支持请等待   ");
 			// 根据版本取得差异文件
 			DiffFileLister<TimeVersion> oper = new DiffFileLister<TimeVersion>(changeList);

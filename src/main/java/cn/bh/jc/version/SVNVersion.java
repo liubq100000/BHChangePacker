@@ -66,21 +66,12 @@ public class SVNVersion extends StoreVersion {
 	 * @param inUser 用户名称
 	 * @param inPwd 用户密码
 	 * @param startVersion 开始版本号
-	 * @param inExportProjectName 导出工程名称
+	 * @param expName 导出工程名称
 	 * @throws Exception
 	 */
-	public SVNVersion(Config inConf, String target, String inSvnUrl, String inUser, String inPwd, Long startVersion, String inExportProjectName) throws Exception {
-		super();
-		this.setTargetPath(target);
-		this.setConf(inConf);
+	public SVNVersion(Config inConf, String target, String inSvnUrl, String inUser, String inPwd, Long startVersion, String expName) throws Exception {
+		super(inConf, target, inSvnUrl, expName);
 		this.svnUrl = inSvnUrl;
-		String tempSvnUrl = PathUtil.replace(svnUrl);
-		this.setProjectName(tempSvnUrl.substring(tempSvnUrl.lastIndexOf("/") + 1));
-		if (inExportProjectName == null || inExportProjectName.trim().length() == 0) {
-			this.setExportProjectName(this.getProjectName());
-		} else {
-			this.setExportProjectName(inExportProjectName.trim());
-		}
 		this.user = inUser;
 		this.pwd = inPwd;
 		this.startVersion = startVersion;

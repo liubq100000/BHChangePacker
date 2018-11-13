@@ -13,18 +13,49 @@ import cn.bh.jc.domain.Config;
 public abstract class StoreVersion {
 
 	/**
-	 * 列出所有变化的对象
+	 * 构造函数
 	 * 
-	 * @return
-	 * @throws Exception
+	 * @param inConf 配置
+	 * @param target 目标
+	 * @param path 工程路径
+	 * @param inExportProjectName 导出的工程名称
 	 */
-	public abstract ChangeVO get() throws Exception;
+	public StoreVersion(Config inConf, String target, String path, String inExportProjectName) {
+		this.setTargetPath(target);
+		this.setConf(inConf);
+		// 工程名称计算
+		String tempPath = PathUtil.replace(path);
+		if (tempPath.lastIndexOf("/") > 0) {
+			this.setProjectName(tempPath.substring(tempPath.lastIndexOf("/") + 1));
+		} else {
+			this.setProjectName(tempPath);
+		}
+		if (inExportProjectName == null || inExportProjectName.trim().length() == 0) {
+			this.setExportProjectName(this.getProjectName());
+		} else {
+			this.setExportProjectName(inExportProjectName.trim());
+		}
+	}
 
 	// 项目名称
 	private String projectName;
 
 	// 导出工程名称
 	private String exportProjectName;
+
+	// 可运行程序执行保存地址
+	private String targetPath;
+
+	// 配置
+	private Config defaultConf;
+
+	/**
+	 * 列出所有变化的对象
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public abstract ChangeVO get() throws Exception;
 
 	/**
 	 * 取得项目名称
@@ -62,9 +93,6 @@ public abstract class StoreVersion {
 		this.exportProjectName = exportProjectName;
 	}
 
-	// 可运行程序执行保存地址
-	private String targetPath;
-
 	/**
 	 * 
 	 * 取得可运行程序保存地址
@@ -83,9 +111,6 @@ public abstract class StoreVersion {
 	public void setTargetPath(String targetPath) {
 		this.targetPath = PathUtil.replace(targetPath);
 	}
-
-	// 配置
-	private Config defaultConf;
 
 	/**
 	 * 

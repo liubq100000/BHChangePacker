@@ -45,7 +45,7 @@ public class PathUtil {
 		// 标准文件路径
 		String name = PathUtil.replace(file);
 		// 特殊文件排除
-		if (name.indexOf(projectName + "/.") > 5) {
+		if (name.indexOf(projectName + "/.") >= 0) {
 			return true;
 		}
 		// 指定目录排除

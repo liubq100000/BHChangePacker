@@ -48,15 +48,8 @@ public class TimeVersion extends StoreVersion {
 	 * @throws Exception
 	 */
 	public TimeVersion(Config inConf, String target, String inProjectPath, String time, String inExportProjectName) throws Exception {
-		super();
-		this.setTargetPath(target);
+		super(inConf, target, inProjectPath, inExportProjectName);
 		this.projectPath = PathUtil.replace(inProjectPath);
-		this.setProjectName(projectPath.substring(projectPath.lastIndexOf("/") + 1));
-		if (inExportProjectName == null || inExportProjectName.trim().length() == 0) {
-			this.setExportProjectName(this.getProjectName());
-		} else {
-			this.setExportProjectName(inExportProjectName.trim());
-		}
 		this.time = time;
 		SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		this.beginTime = f.parse(this.time).getTime();
@@ -96,49 +89,22 @@ public class TimeVersion extends StoreVersion {
 
 		List<File> resList = new ArrayList<File>();
 		if (file.exists()) {
-			if (file.isDirectory() && !isExclusiveOnTime(file)) {
+			// 排除的目录是直接返回
+			if (PathUtil.isExclusive(this.getProjectName(), file.getAbsolutePath(), getConf())) {
+				return resList;
+			}
+			if (file.isDirectory()) {
 				for (File subFile : file.listFiles()) {
 					resList.addAll(listTimeChangeFile(subFile));
 				}
-			} else if (file.isFile() && isFileChangeOnTime(file)) {
-				resList.add(file);
+			} else if (file.isFile()) {
+				// 时间不符合排除
+				long lastMoified = file.lastModified();
+				if (lastMoified > beginTime) {
+					resList.add(file);
+				}
 			}
 		}
 		return resList;
 	}
-
-	/**
-	 * 是否变化过
-	 * 
-	 * @param file
-	 * @return
-	 */
-	private boolean isFileChangeOnTime(File file) {
-		// 特殊文件排除
-		if (isExclusiveOnTime(file)) {
-			return false;
-		}
-		// 时间不符合排除
-		long lastMoified = file.lastModified();
-		if (lastMoified > beginTime) {
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * 是否需要排除
-	 * 
-	 * @param file
-	 * @return
-	 */
-	private boolean isExclusiveOnTime(File file) {
-		if (!file.exists()) {
-			return true;
-		}
-		// 指定目录排除
-		String path = file.getAbsolutePath();
-		return PathUtil.isExclusive(projectPath, path, getConf());
-	}
-
 }
