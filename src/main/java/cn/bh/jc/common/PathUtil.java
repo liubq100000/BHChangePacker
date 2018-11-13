@@ -1,9 +1,8 @@
 package cn.bh.jc.common;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
+import cn.bh.jc.domain.Config;
 import cn.bh.jc.domain.PathVO;
 
 /**
@@ -13,56 +12,55 @@ import cn.bh.jc.domain.PathVO;
  * @since 2017年12月20日
  */
 public class PathUtil {
-	// 文件保存
-	// 排除的文件目录
-	private static List<String> exclusiveList = new ArrayList<String>();
-	// 初始化排除文件列表
-	static {
-		exclusiveList.add("target");
-		exclusiveList.add("classes");
-	}
-
-	// 目录对应文件
-	private static List<PathVO> resPathList = new ArrayList<PathVO>();
-	// 初始化目录对应关系
-	static {
-		resPathList.add(new PathVO("/src/main/java/", "/WEB-INF/classes/"));
-		resPathList.add(new PathVO("/src/main/resources/", "/WEB-INF/classes/"));
-		resPathList.add(new PathVO("/src/main/webapp/", "/"));
-		resPathList.add(new PathVO("/src/java/", "/WEB-INF/classes/"));
-		resPathList.add(new PathVO("/src/webapp/", "/"));
-		resPathList.add(new PathVO("/src/WebRoot/", "/"));
-		resPathList.add(new PathVO("/src/webroot/", "/"));
-		resPathList.add(new PathVO("/src/WebContent/", "/"));
-		resPathList.add(new PathVO("/src/webcontent/", "/"));
-		resPathList.add(new PathVO("/overlays/com.jc.jcap.jcap-static-1.2/", "/"));
-		resPathList.add(new PathVO("/WebRoot/", "/"));
-		resPathList.add(new PathVO("/WebContent/", "/"));
-		resPathList.add(new PathVO("/webroot/", "/"));
-		resPathList.add(new PathVO("/webcontent/", "/"));
-	}
 
 	/**
-	 * 目录对应文件
+	 * 替换成目录
 	 * 
+	 * @param path 源目录
+	 * @param conf 配置
 	 * @return
 	 */
-	public static String replaceToTargetDir(String path) {
+	public static String replaceToTargetDir(String path, Config conf) {
 		String inPath = replace(path);
 		inPath = "/" + inPath + "/";
-		for (PathVO entry : resPathList) {
+		for (PathVO entry : conf.relList()) {
 			inPath = inPath.replace(entry.getSrcPath(), entry.getTargetPath());
 		}
 		return replace(inPath);
 	}
 
 	/**
-	 * 取得排除的文件列表
+	 * 是否需要排除
 	 * 
+	 * 这样仍然排除不了所有目录 例如：abc/ddd/asd.d这个类型目录
+	 * 
+	 * @param file
 	 * @return
 	 */
-	public static List<String> getExclusiveList() {
-		return exclusiveList;
+	public static boolean isExclusive(String projectName, String file, Config conf) {
+		// 空对象
+		if (file == null) {
+			return true;
+		}
+		// 标准文件路径
+		String name = PathUtil.replace(file);
+		// 特殊文件排除
+		if (name.indexOf(projectName + "/.") > 5) {
+			return true;
+		}
+		// 指定目录排除
+		for (String subPath : conf.exclusiveDirList()) {
+			if (name.indexOf(projectName + "/" + subPath) > 5) {
+				return true;
+			}
+		}
+		// 指定文件扩展名排除
+		for (String fileExt : conf.exclusiveFileExtList()) {
+			if (name.endsWith(fileExt)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

@@ -24,4 +24,23 @@ public class PathVO {
 		return targetPath;
 	}
 
+	public int hashCode() {
+		return (srcPath).hashCode();
+	}
+
+	public String toString() {
+		return srcPath;
+	}
+
+	public boolean equals(Object vo) {
+		if (vo == null) {
+			return false;
+		}
+		try {
+			PathVO newVO = (PathVO) vo;
+			return this.getSrcPath().equals(newVO.getSrcPath());
+		} catch (Exception e) {
+			return false;
+		}
+	}
 }

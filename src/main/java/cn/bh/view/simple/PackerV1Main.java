@@ -7,6 +7,7 @@ import cn.bh.jc.DiffFileLister;
 import cn.bh.jc.DiffFilePacker;
 import cn.bh.jc.common.SysLog;
 import cn.bh.jc.domain.ChangeVO;
+import cn.bh.jc.domain.Config;
 import cn.bh.jc.version.TimeVersion;
 
 /**
@@ -23,15 +24,17 @@ public class PackerV1Main {
 		try {
 			// 工程所用的tomcat地址（主要是为了Copy class等文件）
 			String projectTomcat = "D:\\tomcat\\webapps\\wsb_forum";
+			// 配置
+			Config conf = new Config();
 			// 工程地址
 			List<TimeVersion> changeList = new ArrayList<TimeVersion>();
-			changeList.add(new TimeVersion(projectTomcat, "X:\\workspace\\wsb_forum", "2018-04-01 23:59:59"));
+			changeList.add(new TimeVersion(conf, projectTomcat, "X:\\workspace\\wsb_forum", "2018-04-01 23:59:59"));
 			SysLog.log(" 开始支持请等待   ");
 			// 根据版本取得差异文件
 			DiffFileLister<TimeVersion> oper = new DiffFileLister<TimeVersion>(changeList);
 			List<ChangeVO> list = oper.listChange();
 			// 打包
-			DiffFilePacker p = new DiffFilePacker("C:/Users/Administrator/Desktop");
+			DiffFilePacker p = new DiffFilePacker("C:/Users/Administrator/Desktop", conf);
 			p.pack(list);
 			SysLog.log("\r\n 处理完成   ");
 		} catch (Exception e) {

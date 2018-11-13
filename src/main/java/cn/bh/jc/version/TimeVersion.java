@@ -8,10 +8,10 @@ import java.util.List;
 import cn.bh.jc.common.PathUtil;
 import cn.bh.jc.domain.ChangeInfo;
 import cn.bh.jc.domain.ChangeVO;
-import cn.bh.jc.handle.TimeWorker;
+import cn.bh.jc.domain.Config;
 
 /**
- * 时间变化版本
+ * 时间变化方式收集变化
  * 
  * @author liubq
  * @since 2018年1月16日
@@ -19,52 +19,47 @@ import cn.bh.jc.handle.TimeWorker;
 public class TimeVersion extends StoreVersion {
 	// 项目目录
 	private final String projectPath;
-	// 项目名称
-	private final String projectName;
-	// 导出工程名称
-	private final String exportProjectName;
 	// 输入时间
 	private final String time;
 	// 开始时间
 	private final long beginTime;
-	// 时间版本
-	private final TimeWorker worker;
 
 	/**
 	 * 时间变化版本
 	 * 
+	 * @param inConf 配置信息
 	 * @param target 可运行程序（编译后程序）保存地址
 	 * @param inProjectPath 项目工程地址
 	 * @param time 开始时间
 	 * @throws Exception
 	 */
-	public TimeVersion(String target, String inProjectPath, String time) throws Exception {
-		this(target, inProjectPath, time, null);
+	public TimeVersion(Config inConf, String target, String inProjectPath, String time) throws Exception {
+		this(inConf, target, inProjectPath, time, null);
 	}
 
 	/**
 	 * 时间变化版本
 	 * 
+	 * @param inConf 配置信息
 	 * @param target 可运行程序（编译后程序）保存地址
 	 * @param inProjectPath 项目工程地址
 	 * @param time 开始时间
 	 * @param inExportProjectName 导出工程名称
 	 * @throws Exception
 	 */
-	public TimeVersion(String target, String inProjectPath, String time, String inExportProjectName) throws Exception {
+	public TimeVersion(Config inConf, String target, String inProjectPath, String time, String inExportProjectName) throws Exception {
 		super();
 		this.setTargetPath(target);
 		this.projectPath = PathUtil.replace(inProjectPath);
-		this.projectName = projectPath.substring(projectPath.lastIndexOf("/") + 1);
+		this.setProjectName(projectPath.substring(projectPath.lastIndexOf("/") + 1));
 		if (inExportProjectName == null || inExportProjectName.trim().length() == 0) {
-			exportProjectName = projectName;
+			this.setExportProjectName(this.getProjectName());
 		} else {
-			exportProjectName = inExportProjectName.trim();
+			this.setExportProjectName(inExportProjectName.trim());
 		}
 		this.time = time;
 		SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		this.beginTime = f.parse(this.time).getTime();
-		worker = new TimeWorker(this);
 	}
 
 	/**
@@ -77,12 +72,12 @@ public class TimeVersion extends StoreVersion {
 		ChangeVO resVO = new ChangeVO();
 		resVO.setVersion(this);
 		// 取得变化文件列表
-		List<File> changeFileList = worker.listAllChangeFile();
+		List<File> changeFileList = listTimeChangeFile(new File(projectPath));
 		// 变成标准地址
 		String tempFile;
 		List<String> changeList = new ArrayList<String>();
 		for (File cf : changeFileList) {
-			tempFile = PathUtil.trimName(cf.getAbsolutePath(), projectName);
+			tempFile = PathUtil.trimName(cf.getAbsolutePath(), this.getProjectName());
 			changeList.add(tempFile);
 		}
 		ChangeInfo resInfo = new ChangeInfo();
@@ -91,25 +86,59 @@ public class TimeVersion extends StoreVersion {
 		return resVO;
 	}
 
-	public String getProjectPath() {
-		return projectPath;
+	/**
+	 * 列出所有变化文件
+	 * 
+	 * @param file
+	 * @return
+	 */
+	private List<File> listTimeChangeFile(File file) {
+
+		List<File> resList = new ArrayList<File>();
+		if (file.exists()) {
+			if (file.isDirectory() && !isExclusiveOnTime(file)) {
+				for (File subFile : file.listFiles()) {
+					resList.addAll(listTimeChangeFile(subFile));
+				}
+			} else if (file.isFile() && isFileChangeOnTime(file)) {
+				resList.add(file);
+			}
+		}
+		return resList;
 	}
 
-	public String getTime() {
-		return time;
+	/**
+	 * 是否变化过
+	 * 
+	 * @param file
+	 * @return
+	 */
+	private boolean isFileChangeOnTime(File file) {
+		// 特殊文件排除
+		if (isExclusiveOnTime(file)) {
+			return false;
+		}
+		// 时间不符合排除
+		long lastMoified = file.lastModified();
+		if (lastMoified > beginTime) {
+			return true;
+		}
+		return false;
 	}
 
-	public long getBeginTime() {
-		return beginTime;
-	}
-
-	public String getExportProjectName() {
-		return exportProjectName;
-	}
-
-	@Override
-	public String getProjectName() {
-		return projectName;
+	/**
+	 * 是否需要排除
+	 * 
+	 * @param file
+	 * @return
+	 */
+	private boolean isExclusiveOnTime(File file) {
+		if (!file.exists()) {
+			return true;
+		}
+		// 指定目录排除
+		String path = file.getAbsolutePath();
+		return PathUtil.isExclusive(projectPath, path, getConf());
 	}
 
 }

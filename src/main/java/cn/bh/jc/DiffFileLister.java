@@ -40,7 +40,7 @@ public class DiffFileLister<E extends StoreVersion> {
 		for (E version : changeList) {
 			vo = version.get();
 			if (vo != null && vo.getInfo() != null) {
-				cList.add(version.get());
+				cList.add(vo);
 			}
 		}
 		return cList;

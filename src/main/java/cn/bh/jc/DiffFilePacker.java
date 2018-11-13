@@ -13,6 +13,7 @@ import cn.bh.jc.common.FileCopy;
 import cn.bh.jc.common.PathUtil;
 import cn.bh.jc.common.SysLog;
 import cn.bh.jc.domain.ChangeVO;
+import cn.bh.jc.domain.Config;
 
 /**
  * 变更文件打包工具
@@ -26,13 +27,16 @@ public class DiffFilePacker {
 	private String exportSavePath;
 	// 删除文件列表
 	private String deleteFile;
+	// 默认配置
+	private Config conf;
 
 	/**
 	 * 变更文件打包工具
 	 * 
-	 * @param inPath 打包文件保存路径 例如：C:\\Users\\Administrator\\Desktop\\test
+	 * @param savePath 打包文件保存路径 例如：C:\\Users\\Administrator\\Desktop\\test
+	 * @param inConf 默认配置
 	 */
-	public DiffFilePacker(String savePath) {
+	public DiffFilePacker(String savePath, Config inConf) {
 		if (savePath == null || savePath.trim().length() == 0) {
 			SysLog.log("请输入保存路径");
 			throw new RuntimeException("请输入保存路径");
@@ -51,7 +55,8 @@ public class DiffFilePacker {
 		this.exportSavePath = saveDir.getAbsolutePath() + "/upgrade_" + System.currentTimeMillis();
 		File file = new File(exportSavePath);
 		file.mkdirs();
-
+		// 配置
+		conf = inConf;
 	}
 
 	/**
@@ -68,7 +73,6 @@ public class DiffFilePacker {
 			return actFileList;
 		}
 		for (ChangeVO entry : cList) {
-			List<String> propertiesFileList = new ArrayList<String>();
 			// 取得变更文件对应可执行文件
 			File targetFile = new File(entry.getVersion().getTargetPath());
 			if (!targetFile.exists()) {
@@ -101,10 +105,6 @@ public class DiffFilePacker {
 				try {
 					FileCopy.copyFile(f, newFile);
 					actFileList.add(newFile.getAbsolutePath());
-					// 特殊文件记录，用户提醒
-					if (newFile.getAbsolutePath().endsWith(".properties")) {
-						propertiesFileList.add(newFile.getAbsolutePath());
-					}
 				} catch (Exception e) {
 					SysLog.log("文件复制异常", e);
 				}
@@ -119,21 +119,13 @@ public class DiffFilePacker {
 				String newLine;
 				for (String line : delList) {
 					line = PathUtil.replace(line);
-					newLine = delBasePath + PathUtil.replaceToTargetDir(line);
+					newLine = delBasePath + PathUtil.replaceToTargetDir(line, conf);
 					newLine = PathUtil.replace(newLine);
 					delTxt.append(newLine + "\r\n");
 					SysLog.log(newLine);
 				}
 				Files.write(Paths.get(deleteFile), delTxt.toString().getBytes());
 				SysLog.log("删除文件列表---------------------------------");
-			}
-			// 配置文件，打印处理提醒使用者
-			if (propertiesFileList.size() > 0) {
-				SysLog.log("\r\n配置文件变化列表，请手动检查是否需要@@@@@@@@@@@@@@@@");
-				for (String line : propertiesFileList) {
-					SysLog.log(line);
-				}
-				SysLog.log("配置文件变化列表，请手动检查是否需要@@@@@@@@@@@@@@@@");
 			}
 			SysLog.log("\r\n 项目：" + entry.getVersion().getProjectName() + " 打包完成，打包到地址：" + saveFilePre);
 			SysLog.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
@@ -186,10 +178,10 @@ public class DiffFilePacker {
 		fileName = PathUtil.replace(fileName);
 		if (fileName.lastIndexOf("/") >= 0) {
 			String dir = fileName.substring(0, fileName.lastIndexOf("/"));
-			String allDir = PathUtil.replaceToTargetDir(basePath + "/" + dir);
+			String allDir = PathUtil.replaceToTargetDir(basePath + "/" + dir, conf);
 			return new File(allDir);
 		} else {
-			String allDir = PathUtil.replaceToTargetDir(basePath + "/" + fileName);
+			String allDir = PathUtil.replaceToTargetDir(basePath + "/" + fileName, conf);
 			return new File(allDir);
 		}
 
