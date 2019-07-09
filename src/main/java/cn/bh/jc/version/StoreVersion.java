@@ -26,7 +26,8 @@ public abstract class StoreVersion {
 		// 工程名称计算
 		String tempPath = PathUtil.replace(path);
 		if (tempPath.lastIndexOf("/") > 0) {
-			this.setProjectName(tempPath.substring(tempPath.lastIndexOf("/") + 1));
+			int end = tempPath.lastIndexOf(".") > tempPath.lastIndexOf("/") ? tempPath.lastIndexOf(".") : tempPath.length();
+			this.setProjectName(tempPath.substring(tempPath.lastIndexOf("/") + 1, end));
 		} else {
 			this.setProjectName(tempPath);
 		}
