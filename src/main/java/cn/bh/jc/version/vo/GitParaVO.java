@@ -19,6 +19,12 @@ public class GitParaVO {
 	private String gitPass;
 	// 分支
 	private String gitBranch;
+	// 工程所用的tomcat地址（主要是为了Copy class等文件）
+	private String target;
+	// 开始版本
+	private String startVersion;
+	// 导出工程名
+	private String expName;
 
 	/**
 	 * 构造
@@ -27,13 +33,17 @@ public class GitParaVO {
 	 * @param gitName 用户名称
 	 * @param gitPass 用户密码
 	 * @param gitBranch 分支
+	 * @param startVersion 开始版本
+	 * @param target 编译后代码位置
 	 */
-	public GitParaVO(String gitUrl, String gitName, String gitPass, String gitBranch) {
+	public GitParaVO(String gitUrl, String gitName, String gitPass, String gitBranch, String startVersion, String target) {
 		super();
 		this.gitUrl = gitUrl;
 		this.gitName = gitName;
 		this.gitPass = gitPass;
 		this.gitBranch = gitBranch;
+		this.startVersion = startVersion;
+		this.target = target;
 		try {
 			localRepositoryDir = new File("./repository").getCanonicalPath();
 		} catch (IOException e) {
@@ -50,15 +60,18 @@ public class GitParaVO {
 	 * @param gitName 用户名称
 	 * @param gitPass 用户密码
 	 * @param gitBranch 分支
+	 * @param startVersion 开始版本
+	 * @param target 编译后代码位置
 	 * @param repositoryDir 本地资源目录（.git目录上层）
 	 */
-	public GitParaVO(String gitUrl, String gitName, String gitPass, String gitBranch, File repositoryDir) {
+	public GitParaVO(String gitUrl, String gitName, String gitPass, String gitBranch, String startVersion, String target, File repositoryDir) {
 		super();
 		this.gitUrl = gitUrl;
 		this.gitName = gitName;
 		this.gitPass = gitPass;
 		this.gitBranch = gitBranch;
-
+		this.startVersion = startVersion;
+		this.target = target;
 		if (!repositoryDir.isDirectory()) {
 			throw new RuntimeException("参数不正确，必须是git资源的目录");
 		}
@@ -114,6 +127,43 @@ public class GitParaVO {
 	 */
 	public String getLocalRepositoryDir() {
 		return localRepositoryDir;
+	}
+
+	/**
+	 * 开始版本
+	 * 
+	 * @return
+	 */
+	public String getStartVersion() {
+		return startVersion;
+	}
+
+	/**
+	 * 编译后代码位置
+	 * 
+	 * @return
+	 */
+	public String getTarget() {
+		return target;
+	}
+
+	/**
+	 * 导出工程名称
+	 * 
+	 * @return
+	 */
+	public String getExpName() {
+		return expName;
+	}
+
+	/**
+	 * 导出工程名称
+	 * 
+	 * @param expName
+	 */
+	public GitParaVO setExpName(String expName) {
+		this.expName = expName;
+		return this;
 	}
 
 }

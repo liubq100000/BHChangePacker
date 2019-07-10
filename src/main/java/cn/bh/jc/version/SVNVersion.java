@@ -34,23 +34,8 @@ import cn.bh.jc.version.vo.SvnParaVO;
 public class SVNVersion extends StoreVersion {
 	// 参数
 	private final SvnParaVO para;
-	// 开始版本
-	private Long startVersion;
 	// 结束版本
 	private Long endVersion;
-
-	/**
-	 * SVN变化版本
-	 * 
-	 * @param inConf 配置信息
-	 * @param target 可运行程序（编译后程序）保存地址
-	 * @param inPara 参数
-	 * @param startVersion 开始版本号
-	 * @throws Exception
-	 */
-	public SVNVersion(Config inConf, String target, SvnParaVO inPara, Long startVersion) throws Exception {
-		this(inConf, target, inPara, startVersion, null);
-	}
 
 	/**
 	 * SVN变化版本
@@ -62,10 +47,9 @@ public class SVNVersion extends StoreVersion {
 	 * @param expName 导出工程名称
 	 * @throws Exception
 	 */
-	public SVNVersion(Config inConf, String target, SvnParaVO inPara, Long startVersion, String expName) throws Exception {
-		super(inConf, target, inPara.getSvnUrl(), expName);
+	public SVNVersion(Config inConf, SvnParaVO inPara) throws Exception {
+		super(inConf, inPara.getTarget(), inPara.getSvnUrl(), inPara.getExpName());
 		this.para = inPara;
-		this.startVersion = startVersion;
 		this.endVersion = -1L;
 		// SVN初始化
 		DAVRepositoryFactory.setup();
@@ -139,14 +123,11 @@ public class SVNVersion extends StoreVersion {
 		preSvnUrl = URLDecoder.decode(preSvnUrl, "UTF-8");
 		// 下载这个期间内所有变更文件
 		try {
-			if (startVersion < 0) {
-				startVersion = 1L;
-			}
 			if (endVersion < 0) {
 				endVersion = repository.getLatestRevision();
 			}
 			@SuppressWarnings("unchecked")
-			Collection<SVNLogEntry> logEntries = repository.log(new String[] { "" }, null, startVersion, endVersion, true, true);
+			Collection<SVNLogEntry> logEntries = repository.log(new String[] { "" }, null, para.getStartVersion(), endVersion, true, true);
 			List<String> fileList = new ArrayList<String>();
 			Set<String> delSet = new HashSet<String>();
 			// 我测试这个是有顺序

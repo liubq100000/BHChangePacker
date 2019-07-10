@@ -32,22 +32,6 @@ public class GitVersion extends StoreVersion {
 	// 参数
 	private final GitParaVO para;
 
-	// 版本号
-	private final String startVersion;
-
-	/**
-	 * GIT变化版本
-	 * 
-	 * @param inConf 配置信息
-	 * @param target 可运行程序（编译后程序）保存地址
-	 * @param inPara 参数
-	 * @param startVersion 开始版本号
-	 * @throws Exception
-	 */
-	public GitVersion(Config inConf, String target, GitParaVO inPara, String startVersion) throws Exception {
-		this(inConf, target, inPara, startVersion, null);
-	}
-
 	/**
 	 * GIT变化版本
 	 * 
@@ -58,10 +42,9 @@ public class GitVersion extends StoreVersion {
 	 * @param expName 导出工程名称
 	 * @throws Exception
 	 */
-	public GitVersion(Config inConf, String target, GitParaVO inPara, String startVersion, String expName) throws Exception {
-		super(inConf, target, inPara.getGitUrl(), expName);
+	public GitVersion(Config inConf, GitParaVO inPara) throws Exception {
+		super(inConf, inPara.getTarget(), inPara.getGitUrl(), inPara.getExpName());
 		this.para = inPara;
-		this.startVersion = startVersion;
 	}
 
 	/**
@@ -120,13 +103,14 @@ public class GitVersion extends StoreVersion {
 			SysLog.log("建立git库连接开始");
 			// 判断是否下载过
 			File gitFile = new File(dir.getAbsolutePath() + "/.git");
+			UsernamePasswordCredentialsProvider provider = new UsernamePasswordCredentialsProvider(para.getGitName(), para.getGitPass());
 			if (gitFile.exists()) {
 				git = Git.open(gitFile);
-				git.pull().setRemoteBranchName(para.getGitBranch()).call();
+				git.pull().setRemoteBranchName(para.getGitBranch()).setCredentialsProvider(provider) // 设置权限验证
+						.call();
 			}
 			// 第一次下载
 			else {
-				UsernamePasswordCredentialsProvider provider = new UsernamePasswordCredentialsProvider(para.getGitName(), para.getGitPass());
 				git = Git.cloneRepository().setURI(para.getGitUrl()).setBranch(para.getGitBranch()) // 设置clone下来的分支,默认master
 						.setDirectory(dir) // 设置下载存放路径
 						.setCredentialsProvider(provider) // 设置权限验证
@@ -145,13 +129,12 @@ public class GitVersion extends StoreVersion {
 			LinkedList<RevCommit> list = new LinkedList<RevCommit>();
 			boolean breakFlag = false;
 			for (RevCommit com : allCommitsLater) {
-				SysLog.log("提交" + com.toString());
 				list.push(com);
 				// 把startVersion开始前的一个节点也找到
 				if (breakFlag) {
 					break;
 				}
-				if (com.getId().toString().indexOf(startVersion) >= 0) {
+				if (com.getId().toString().indexOf(para.getStartVersion()) >= 0) {
 					breakFlag = true;
 				}
 			}

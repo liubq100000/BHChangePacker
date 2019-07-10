@@ -23,14 +23,13 @@ public class PackerV2Main {
 	public static void main(String[] args) {
 		try {
 			// 工程所用的tomcat地址（主要是为了Copy class等文件）
-			String exeHome = "D:\\tomcat\\webapps\\ROOT";
 			// 配置
 			Config conf = new Config();
 			// 排除配置文件
 			// conf.addExclusiveFileExt(".properties");
 
 			List<SVNVersion> chageList = new ArrayList<SVNVersion>();
-			chageList.add(new SVNVersion(conf, exeHome, buildStaticVO(), 224421L, "ROOT"));
+			chageList.add(new SVNVersion(conf, buildStaticVO()));
 			SysLog.log("开始执行请等待。。。。。。  ");
 			// 根据版本取得差异文件
 			DiffFileLister<SVNVersion> oper = new DiffFileLister<SVNVersion>(chageList);
@@ -48,6 +47,8 @@ public class PackerV2Main {
 		String url = "svn://172.16.0.155:9999/jcsvn/JC2018-045-ZW%E7%8E%AF%E4%BF%9D%E7%9D%A3%E6%9F%A5%E4%BF%A1%E8%AE%BF%E6%A1%88%E4%BB%B6%E7%BB%9F%E8%AE%A1%E5%B9%B3%E5%8F%B0/00SRC/xf_statis";
 		String username = "liubq";
 		String password = "lbq123456";
-		return new SvnParaVO(url, username, password);
+		String exeHome = "D:\\tomcat\\webapps\\ROOT";
+		Long startVersion = 224421L;
+		return new SvnParaVO(url, username, password, startVersion, exeHome).setExpName("ROOT");
 	}
 }
