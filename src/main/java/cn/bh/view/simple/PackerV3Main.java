@@ -1,5 +1,6 @@
 package cn.bh.view.simple;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +10,7 @@ import cn.bh.jc.common.SysLog;
 import cn.bh.jc.domain.ChangeVO;
 import cn.bh.jc.domain.Config;
 import cn.bh.jc.version.GitVersion;
+import cn.bh.jc.version.vo.GitParaVO;
 
 /**
  * SVN方式打包 注意，必须保持本地最新代码，因为要取本地tomcat下编译好的class,js等文件，本项目不能自动编译 resource
@@ -23,17 +25,13 @@ public class PackerV3Main {
 		try {
 			// 工程所用的tomcat地址（主要是为了Copy class等文件）
 			String exeHome = "F:\\wk_zzb\\other\\apache-tomcat-7-site\\webapps\\gsite";
+			String startVerison = "98dc9dfb981ca72854d804eba7263ce485039302";
 			// 配置
 			Config conf = new Config();
 			// 排除配置文件
 			// conf.addExclusiveFileExt(".properties");
-
 			List<GitVersion> chageList = new ArrayList<GitVersion>();
-			String url = "http://liubq@172.16.4.195:10101/r/gsite-basic.git";
-			String username = "test";
-			String password = "test123456";
-			String gitBranch = "develop";
-			chageList.add(new GitVersion(conf, exeHome, url, username, password, gitBranch, "d28db2fa955fa368c900f34880ffdc107f1ec7c2", "gsite-basic"));
+			chageList.add(new GitVersion(conf, exeHome, buildStaticVO(), startVerison, "gsite-basic"));
 			SysLog.log("开始执行请等待。。。。。。  ");
 			// 根据版本取得差异文件
 			DiffFileLister<GitVersion> oper = new DiffFileLister<GitVersion>(chageList);
@@ -45,5 +43,14 @@ public class PackerV3Main {
 		} catch (Exception e) {
 			SysLog.log("异常", e);
 		}
+	}
+
+	public static GitParaVO buildStaticVO() {
+		String url = "http://liubq@172.16.4.195:10101/r/gsite-basic.git";
+		String username = "test";
+		String password = "test123456";
+		String gitBranch = "develop";
+		File dir = new File("C:\\Users\\Administrator\\Desktop\\dir");
+		return new GitParaVO(url, username, password, gitBranch, dir);
 	}
 }

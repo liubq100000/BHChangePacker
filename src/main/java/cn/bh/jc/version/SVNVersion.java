@@ -23,6 +23,7 @@ import cn.bh.jc.common.SysLog;
 import cn.bh.jc.domain.ChangeInfo;
 import cn.bh.jc.domain.ChangeVO;
 import cn.bh.jc.domain.Config;
+import cn.bh.jc.version.vo.SvnParaVO;
 
 /**
  * SVN版本方式收集变化
@@ -31,12 +32,8 @@ import cn.bh.jc.domain.Config;
  * @since 2018年1月16日
  */
 public class SVNVersion extends StoreVersion {
-	// svn地址
-	private final String svnUrl;
-	// 用户名称
-	private final String user;
-	// 用户密码
-	private final String pwd;
+	// 参数
+	private final SvnParaVO para;
 	// 开始版本
 	private Long startVersion;
 	// 结束版本
@@ -47,14 +44,12 @@ public class SVNVersion extends StoreVersion {
 	 * 
 	 * @param inConf 配置信息
 	 * @param target 可运行程序（编译后程序）保存地址
-	 * @param inSvnUrl svn 地址
-	 * @param inUser 用户名称
-	 * @param inPwd 用户密码
+	 * @param inPara 参数
 	 * @param startVersion 开始版本号
 	 * @throws Exception
 	 */
-	public SVNVersion(Config inConf, String target, String inSvnUrl, String inUser, String inPwd, Long startVersion) throws Exception {
-		this(inConf, target, inSvnUrl, inUser, inPwd, startVersion, null);
+	public SVNVersion(Config inConf, String target, SvnParaVO inPara, Long startVersion) throws Exception {
+		this(inConf, target, inPara, startVersion, null);
 	}
 
 	/**
@@ -62,18 +57,14 @@ public class SVNVersion extends StoreVersion {
 	 * 
 	 * @param inConf 配置信息
 	 * @param target 可运行程序（编译后程序）保存地址
-	 * @param inSvnUrl svn 地址
-	 * @param inUser 用户名称
-	 * @param inPwd 用户密码
+	 * @param inPara 参数
 	 * @param startVersion 开始版本号
 	 * @param expName 导出工程名称
 	 * @throws Exception
 	 */
-	public SVNVersion(Config inConf, String target, String inSvnUrl, String inUser, String inPwd, Long startVersion, String expName) throws Exception {
-		super(inConf, target, inSvnUrl, expName);
-		this.svnUrl = inSvnUrl;
-		this.user = inUser;
-		this.pwd = inPwd;
+	public SVNVersion(Config inConf, String target, SvnParaVO inPara, Long startVersion, String expName) throws Exception {
+		super(inConf, target, inPara.getSvnUrl(), expName);
+		this.para = inPara;
 		this.startVersion = startVersion;
 		this.endVersion = -1L;
 		// SVN初始化
@@ -127,15 +118,15 @@ public class SVNVersion extends StoreVersion {
 		SVNRepository repository = null;
 		try {
 			// 获取SVN的URL。
-			repositoryURL = SVNURL.parseURIEncoded(svnUrl);
+			repositoryURL = SVNURL.parseURIEncoded(para.getSvnUrl());
 			// 根据URL实例化SVN版本库。
 			repository = SVNRepositoryFactory.create(repositoryURL);
 		} catch (Exception e) {
-			SysLog.log("创建版本库实例时失败，版本库的URL是 '" + svnUrl + "'", e);
+			SysLog.log("创建版本库实例时失败，版本库的URL是 '" + para.getSvnUrl() + "'", e);
 			throw e;
 		}
 		// 对版本库设置认证信息。
-		ISVNAuthenticationManager authManager = SVNWCUtil.createDefaultAuthenticationManager(user, pwd.toCharArray());
+		ISVNAuthenticationManager authManager = SVNWCUtil.createDefaultAuthenticationManager(para.getUser(), para.getPwd().toCharArray());
 		repository.setAuthenticationManager(authManager);
 		SVNURL svnRootUrl = repository.getRepositoryRoot(true);
 		if (svnRootUrl == null) {

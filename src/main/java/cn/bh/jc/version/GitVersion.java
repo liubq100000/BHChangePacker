@@ -20,6 +20,7 @@ import cn.bh.jc.common.SysLog;
 import cn.bh.jc.domain.ChangeInfo;
 import cn.bh.jc.domain.ChangeVO;
 import cn.bh.jc.domain.Config;
+import cn.bh.jc.version.vo.GitParaVO;
 
 /**
  * GIT版本方式收集变化
@@ -28,17 +29,10 @@ import cn.bh.jc.domain.Config;
  * @since 2018年1月16日
  */
 public class GitVersion extends StoreVersion {
-	// 地址
-	private final String repositoryDir = new File("./temp").getCanonicalPath();
-	// 地址
-	private final String gitUrl;
-	// 用户名称
-	private final String gitName;
-	// 用户密码
-	private final String gitPass;
-	// 分支
-	private final String gitBranch;
-	// 开始版本
+	// 参数
+	private final GitParaVO para;
+
+	// 版本号
 	private final String startVersion;
 
 	/**
@@ -46,15 +40,12 @@ public class GitVersion extends StoreVersion {
 	 * 
 	 * @param inConf 配置信息
 	 * @param target 可运行程序（编译后程序）保存地址
-	 * @param gitUrl 地址
-	 * @param gitName 用户名称
-	 * @param gitPass 用户密码
-	 * @param gitBranch 分支
+	 * @param inPara 参数
 	 * @param startVersion 开始版本号
 	 * @throws Exception
 	 */
-	public GitVersion(Config inConf, String target, String gitUrl, String gitName, String gitPass, String gitBranch, String startVersion) throws Exception {
-		this(inConf, target, gitUrl, gitName, gitPass, gitBranch, startVersion, null);
+	public GitVersion(Config inConf, String target, GitParaVO inPara, String startVersion) throws Exception {
+		this(inConf, target, inPara, startVersion, null);
 	}
 
 	/**
@@ -62,20 +53,14 @@ public class GitVersion extends StoreVersion {
 	 * 
 	 * @param inConf 配置信息
 	 * @param target 可运行程序（编译后程序）保存地址
-	 * @param gitUrl 地址
-	 * @param gitName 用户名称
-	 * @param gitPass 用户密码
-	 * @param gitBranch 分支
+	 * @param inPara 参数
 	 * @param startVersion 开始版本号
 	 * @param expName 导出工程名称
 	 * @throws Exception
 	 */
-	public GitVersion(Config inConf, String target, String gitUrl, String gitName, String gitPass, String gitBranch, String startVersion, String expName) throws Exception {
-		super(inConf, target, gitUrl, expName);
-		this.gitUrl = gitUrl;
-		this.gitName = gitName;
-		this.gitPass = gitPass;
-		this.gitBranch = gitBranch;
+	public GitVersion(Config inConf, String target, GitParaVO inPara, String startVersion, String expName) throws Exception {
+		super(inConf, target, inPara.getGitUrl(), expName);
+		this.para = inPara;
 		this.startVersion = startVersion;
 	}
 
@@ -122,8 +107,8 @@ public class GitVersion extends StoreVersion {
 	private ChangeInfo listAllSvnChange() throws Exception {
 		Git git = null;
 		try {
-			StringBuilder localRepoPath = new StringBuilder(repositoryDir);
-			localRepoPath.append("/").append(gitName).append("/").append(gitBranch);
+			StringBuilder localRepoPath = new StringBuilder(para.getLocalRepositoryDir());
+			localRepoPath.append("/").append(para.getGitName()).append("/").append(para.getGitBranch());
 			localRepoPath.append("/").append(this.getProjectName());
 			// 下载地址
 			File dir = new File(localRepoPath.toString());
@@ -131,21 +116,18 @@ public class GitVersion extends StoreVersion {
 				dir.mkdirs();
 			}
 			Long startTime = System.currentTimeMillis();
-			SysLog.log("本地库位置，dir" + repositoryDir);
+			SysLog.log("本地库位置，dir" + para.getLocalRepositoryDir());
 			SysLog.log("建立git库连接开始");
 			// 判断是否下载过
 			File gitFile = new File(dir.getAbsolutePath() + "/.git");
-
 			if (gitFile.exists()) {
 				git = Git.open(gitFile);
-				git.pull().setRemoteBranchName(gitBranch).call();
+				git.pull().setRemoteBranchName(para.getGitBranch()).call();
 			}
 			// 第一次下载
 			else {
-				UsernamePasswordCredentialsProvider provider = new UsernamePasswordCredentialsProvider(gitName, gitPass);
-				git = Git.cloneRepository().setURI(gitUrl)
-						// 设置远程URI
-						.setBranch(gitBranch) // 设置clone下来的分支,默认master
+				UsernamePasswordCredentialsProvider provider = new UsernamePasswordCredentialsProvider(para.getGitName(), para.getGitPass());
+				git = Git.cloneRepository().setURI(para.getGitUrl()).setBranch(para.getGitBranch()) // 设置clone下来的分支,默认master
 						.setDirectory(dir) // 设置下载存放路径
 						.setCredentialsProvider(provider) // 设置权限验证
 						.call();
@@ -157,36 +139,39 @@ public class GitVersion extends StoreVersion {
 			}
 			SysLog.log("建立git库连接完成，耗时：" + (System.currentTimeMillis() - startTime));
 			startTime = System.currentTimeMillis();
+			// 取得所有日志
 			Iterable<RevCommit> allCommitsLater = git.log().call();
-			// 反转
+			// 过滤出需要的提交
 			LinkedList<RevCommit> list = new LinkedList<RevCommit>();
+			boolean breakFlag = false;
 			for (RevCommit com : allCommitsLater) {
+				SysLog.log("提交" + com.toString());
 				list.push(com);
-			}
-			List<DiffEntry> allDiffEntry = new ArrayList<DiffEntry>();
-			boolean start = false;
-			String rcid;
-			Repository repository = git.getRepository();
-			RevCommit pre;
-			RevCommit now;
-			for (int i = 1; i < list.size(); i++) {
-				pre = list.get(i - 1);
-				now = list.get(i);
-				rcid = now.getId().toString();
-				if (!start && rcid.indexOf(startVersion) >= 0) {
-					start = true;
+				// 把startVersion开始前的一个节点也找到
+				if (breakFlag) {
+					break;
 				}
-				if (start) {
-					try (TreeWalk tw = new TreeWalk(repository);) {
-						tw.addTree(pre.getTree());
-						tw.addTree(now.getTree());
-						tw.setRecursive(true);
-						RenameDetector rd = new RenameDetector(repository);
-						rd.addAll(DiffEntry.scan(tw));
-						allDiffEntry.addAll(rd.compute());
-					} catch (Exception ex) {
-						ex.printStackTrace();
-					}
+				if (com.getId().toString().indexOf(startVersion) >= 0) {
+					breakFlag = true;
+				}
+			}
+			SysLog.log("取得提交历史：" + list.size());
+			List<DiffEntry> allDiffEntry = new ArrayList<DiffEntry>();
+			Repository repository = git.getRepository();
+			RevCommit now;
+			RevCommit pre;
+			for (int index = 1; index < list.size(); index++) {
+				pre = list.get(index - 1);
+				now = list.get(index);
+				try (TreeWalk tw = new TreeWalk(repository);) {
+					tw.addTree(pre.getTree());
+					tw.addTree(now.getTree());
+					tw.setRecursive(true);
+					RenameDetector rd = new RenameDetector(repository);
+					rd.addAll(DiffEntry.scan(tw));
+					allDiffEntry.addAll(rd.compute());
+				} catch (Exception ex) {
+					ex.printStackTrace();
 				}
 			}
 			SysLog.log("分析变更历史，耗时：" + (System.currentTimeMillis() - startTime));
